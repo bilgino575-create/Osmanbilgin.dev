@@ -1,35 +1,31 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/data";
-import SmoothScroll from "@/components/providers/SmoothScroll";
-import CustomCursor from "@/components/layout/CustomCursor";
-import Loader from "@/components/layout/Loader";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import Nav from "@/components/html/Nav";
+import Footer from "@/components/html/Footer";
+import Chrome from "@/components/ui/Chrome";
 
-const inter = Inter({
-  variable: "--font-inter",
+const display = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const mono = Geist_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
+const title = "Osman Bilgin | Full Stack Developer & Software Engineer";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Osman Bilgin | Full Stack Developer & Software Engineer",
+    default: title,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -37,22 +33,18 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
   applicationName: `${siteConfig.name} Portfolio`,
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
+  formatDetection: { email: false, address: false, telephone: false },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: siteConfig.url,
-    title: "Osman Bilgin | Full Stack Developer & Software Engineer",
+    title,
     description: siteConfig.description,
     siteName: `${siteConfig.name} Portfolio`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Osman Bilgin | Full Stack Developer & Software Engineer",
+    title,
     description: siteConfig.description,
   },
   robots: {
@@ -66,26 +58,30 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  alternates: {
-    canonical: siteConfig.url,
-  },
+  alternates: { canonical: siteConfig.url },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#050505",
+  themeColor: "#050507",
   colorScheme: "dark",
 };
 
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${siteConfig.url}/#person`,
   name: siteConfig.name,
+  givenName: siteConfig.firstName,
+  familyName: siteConfig.lastName,
   url: siteConfig.url,
-  jobTitle: siteConfig.titles,
+  jobTitle: siteConfig.titles.map(
+    (t) => t.charAt(0) + t.slice(1).toLowerCase()
+  ),
   email: `mailto:${siteConfig.email}`,
+  telephone: siteConfig.phoneDisplay,
   sameAs: [siteConfig.instagramUrl],
   knowsAbout: siteConfig.keywords,
   description: siteConfig.description,
@@ -94,42 +90,38 @@ const personJsonLd = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${siteConfig.url}/#website`,
   name: `${siteConfig.name} Portfolio`,
   url: siteConfig.url,
   description: siteConfig.description,
-  author: {
-    "@type": "Person",
-    name: siteConfig.name,
-  },
+  inLanguage: "en",
+  author: { "@id": `${siteConfig.url}/#person` },
 };
+
+const safeJson = (o: unknown) => JSON.stringify(o).replace(/</g, "\\u003c");
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable}`}
-    >
-      <body className="relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-primary antialiased selection:bg-accent selection:text-black">
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+      <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJson(personJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJson(websiteJsonLd) }}
         />
-        <div className="noise-fixed" aria-hidden="true" />
-        <Loader />
-        <CustomCursor />
-        <SmoothScroll>
-          <Navbar />
-          <main className="relative z-10">{children}</main>
-          <Footer />
-        </SmoothScroll>
+        <a className="skip" href="#about">
+          Skip to content
+        </a>
+        <div className="static-bg" aria-hidden="true" />
+        <Nav />
+        {children}
+        <Footer />
+        <Chrome />
       </body>
     </html>
   );
