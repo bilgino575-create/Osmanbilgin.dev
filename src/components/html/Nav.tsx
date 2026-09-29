@@ -64,9 +64,9 @@ export default function Nav() {
             type="button"
             className="btn hidden !h-9 !px-3 md:inline-flex"
             onClick={() => store.set({ paletteOpen: true })}
-            aria-label="Open command palette"
           >
-            <span className="kbd">⌘K</span> run
+            <span className="kbd" aria-hidden="true">⌘K</span> run
+            <span className="sr-only"> command palette (Ctrl or ⌘ + K)</span>
           </button>
           <a href="#contact" onClick={(e) => go(e, "#contact")} className="btn !h-9 !px-4">
             Hire me

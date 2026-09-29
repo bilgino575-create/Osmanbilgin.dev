@@ -78,6 +78,6 @@ export const SOURCES: SourceFile[] = [
   }
 ];
 
-export const GIT_LOG = "* 5289ce3 (HEAD -> feat/root-access) Acts IV and V: fibre tunnel, deploy-map globe, return to the desk, rainy facade ending\n* f3286ab Act III: the silicon — motherboard, iridescent die, service blocks, traces, streams, gauges\n* fe7a3e9 Act II: inside the screen — curved OS backdrop, live window panes, keyboard focus\n* 4873acc Act I: the desk — procedural room, rain window, monitor OS, keyboard, duck, steam, phone\n* dbc807c Foundation: pure data module, semantic HTML site, scroll driver, palette, HUD\n* 8da0cea Import current portfolio site as baseline";
-export const GIT_HEAD = "5289ce3";
-export const GENERATED_AT = "2026-09-29T12:06:15.006Z";
+export const GIT_LOG = "* 3fc434c (HEAD -> feat/root-access, origin/feat/root-access) Verification fixes: per-resource disposal, edge fades, a11y targets, source maps\n* 5289ce3 Acts IV and V: fibre tunnel, deploy-map globe, return to the desk, rainy facade ending\n* f3286ab Act III: the silicon — motherboard, iridescent die, service blocks, traces, streams, gauges\n* fe7a3e9 Act II: inside the screen — curved OS backdrop, live window panes, keyboard focus\n* 4873acc Act I: the desk — procedural room, rain window, monitor OS, keyboard, duck, steam, phone\n* dbc807c Foundation: pure data module, semantic HTML site, scroll driver, palette, HUD\n* 8da0cea Import current portfolio site as baseline";
+export const GIT_HEAD = "3fc434c";
+export const GENERATED_AT = "2026-09-29T12:09:03.986Z";
