@@ -11,10 +11,30 @@ declare global {
   }
 }
 
-/** Writes real renderer numbers to the store four times a second. */
+/**
+ * Writes real renderer numbers to the store four times a second.
+ *
+ * `renderer.info` auto-resets on every render call, and the post-processing
+ * composer issues several per frame, so the counters are read at the very
+ * start of the next frame (the previous frame's total) and reset manually.
+ */
 export default function StatsWriter() {
   const gl = useThree((s) => s.gl);
-  const acc = useRef({ frames: 0, time: 0, last: 0, ms: 0 });
+  const acc = useRef({ frames: 0, time: 0, last: 0, ms: 0, calls: 0, triangles: 0 });
+
+  useEffect(() => {
+    gl.info.autoReset = false;
+    return () => {
+      gl.info.autoReset = true;
+    };
+  }, [gl]);
+
+  // read the previous frame's totals, then reset for this frame
+  useFrame(() => {
+    acc.current.calls = gl.info.render.calls;
+    acc.current.triangles = gl.info.render.triangles;
+    gl.info.reset();
+  }, -2000);
 
   useEffect(() => {
     window.__stats = () => ({
@@ -46,8 +66,8 @@ export default function StatsWriter() {
         stats: {
           fps,
           ms: a.ms,
-          calls: info.render.calls,
-          triangles: info.render.triangles,
+          calls: a.calls,
+          triangles: a.triangles,
           geometries: info.memory.geometries,
           textures: info.memory.textures,
           programs: info.programs?.length ?? 0,

@@ -1,5 +1,7 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -79,15 +81,10 @@ export default function Mug() {
       }),
     []
   );
-  useEffect(
-    () => () => {
-      body.dispose();
-      handle.dispose();
-      steamGeo.dispose();
-      steamMat.dispose();
-    },
-    [body, handle, steamGeo, steamMat]
-  );
+  useDispose(body);
+  useDispose(handle);
+  useDispose(steamGeo);
+  useDispose(steamMat);
 
   const steamRef = useRef<InstancedMesh>(null);
   const plane = useMemo(() => new Plane(new Vector3(0, 1, 0), -(L.deskY + 0.1)), []);

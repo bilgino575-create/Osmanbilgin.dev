@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useDispose } from "../utils/useDispose";
+
+import { useMemo } from "react";
 import { RoundedBoxGeometry } from "three-stdlib";
 import { L } from "./layout";
 import { useMaterials } from "./context";
@@ -11,14 +13,9 @@ export default function Desk() {
   const top = useMemo(() => new RoundedBoxGeometry(L.deskW, 0.04, L.deskD, 3, 0.012), []);
   const mat = useMemo(() => new RoundedBoxGeometry(0.9, 0.004, 0.4, 2, 0.002), []);
   const led = useMemo(() => new RoundedBoxGeometry(L.deskW - 0.2, 0.008, 0.012, 2, 0.003), []);
-  useEffect(
-    () => () => {
-      top.dispose();
-      mat.dispose();
-      led.dispose();
-    },
-    [top, mat, led]
-  );
+  useDispose(top);
+  useDispose(mat);
+  useDispose(led);
   const legY = L.deskY / 2 - 0.02;
   return (
     <group>

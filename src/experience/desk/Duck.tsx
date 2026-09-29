@@ -1,6 +1,8 @@
 "use client";
 
-import { forwardRef, useEffect, useMemo } from "react";
+import { useDispose } from "../utils/useDispose";
+
+import { forwardRef, useMemo } from "react";
 import { BufferGeometry, ConeGeometry, Group, SphereGeometry, Matrix4 } from "three";
 import { mergeBufferGeometries } from "three-stdlib";
 import { L } from "./layout";
@@ -59,14 +61,9 @@ export function useDuckGeometry() {
     eyes.forEach((e) => e.dispose());
     return { yellow, beak, eye };
   }, []);
-  useEffect(
-    () => () => {
-      geos.yellow.dispose();
-      geos.beak.dispose();
-      geos.eye.dispose();
-    },
-    [geos]
-  );
+  useDispose(geos.yellow);
+  useDispose(geos.beak);
+  useDispose(geos.eye);
   return geos;
 }
 

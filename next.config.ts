@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // source maps for the shipped bundles (Lighthouse best-practices audit; also useful in production devtools)
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;

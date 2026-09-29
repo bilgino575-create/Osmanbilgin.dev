@@ -1,5 +1,7 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -99,16 +101,11 @@ export default function Exterior() {
       }),
     []
   );
-  useEffect(
-    () => () => {
-      winGeo.dispose();
-      winMat.dispose();
-      rainGeo.dispose();
-      rainMat.dispose();
-      cityMat.dispose();
-    },
-    [winGeo, winMat, rainGeo, rainMat, cityMat]
-  );
+  useDispose(winGeo);
+  useDispose(winMat);
+  useDispose(rainGeo);
+  useDispose(rainMat);
+  useDispose(cityMat);
 
   useEffect(() => {
     const f = facade.current;

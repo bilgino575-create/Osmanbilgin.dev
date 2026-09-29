@@ -31,7 +31,6 @@ export default function Nav() {
           href="#home"
           onClick={(e) => go(e, "#home")}
           className="mono flex items-center gap-3 text-[12px] tracking-[0.2em]"
-          aria-label={`${siteConfig.name}, back to top`}
         >
           <span
             aria-hidden="true"
@@ -41,6 +40,7 @@ export default function Nav() {
             {siteConfig.initials}
           </span>
           <span className="hidden sm:inline">{siteConfig.url.replace("https://", "")}</span>
+          <span className="sr-only">, back to the top</span>
         </a>
 
         <nav

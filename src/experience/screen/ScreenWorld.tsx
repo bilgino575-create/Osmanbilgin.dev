@@ -1,7 +1,9 @@
 "use client";
 
+import { useDispose, useDisposeAll } from "../utils/useDispose";
+
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   CanvasTexture,
   Color,
@@ -98,17 +100,12 @@ export default function ScreenWorld() {
   const versions = useRef(windows.map(() => -1));
   const backdropVersion = useRef(-1);
 
-  useEffect(
-    () => () => {
-      backdropTex.dispose();
-      backdropMat.dispose();
-      backdropGeo.dispose();
-      winTex.forEach((t) => t.dispose());
-      winMat.forEach((m) => m.dispose());
-      winGeo.forEach((g) => g.dispose());
-    },
-    [backdropTex, backdropMat, backdropGeo, winTex, winMat, winGeo]
-  );
+  useDispose(backdropTex);
+  useDispose(backdropMat);
+  useDispose(backdropGeo);
+  useDisposeAll(winTex);
+  useDisposeAll(winMat);
+  useDisposeAll(winGeo);
 
   useFrame((state) => {
     const on = rig.p > 0.19 && rig.p < 0.48;

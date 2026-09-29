@@ -64,8 +64,9 @@ export function sectionById(id: string): Section | undefined {
 export function sectionVisibility(s: Section, p: number): number {
   const fade = 0.02;
   if (p < s.from - fade || p > s.to + fade) return 0;
-  const inA = clamp01((p - (s.from - fade)) / (fade * 2));
-  const outA = clamp01((s.to + fade - p) / (fade * 2));
+  // the first and last sections are fully visible at the scroll edges
+  const inA = s.from <= 0 ? 1 : clamp01((p - (s.from - fade)) / (fade * 2));
+  const outA = s.to >= 1 ? 1 : clamp01((s.to + fade - p) / (fade * 2));
   return Math.min(inA, outA);
 }
 

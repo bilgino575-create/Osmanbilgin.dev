@@ -1,5 +1,7 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -226,16 +228,11 @@ export default function Keyboard() {
     return mat;
   }, [m.keycap, atlas]);
 
-  useEffect(
-    () => () => {
-      atlas.map.dispose();
-      atlas.emissive.dispose();
-      capGeo.dispose();
-      caseGeo.dispose();
-      material.dispose();
-    },
-    [atlas, capGeo, caseGeo, material]
-  );
+  useDispose(atlas.map);
+  useDispose(atlas.emissive);
+  useDispose(capGeo);
+  useDispose(caseGeo);
+  useDispose(material);
 
   // state arrays (no allocation per frame)
   const press = useMemo(() => new Float32Array(keys.length), [keys]);

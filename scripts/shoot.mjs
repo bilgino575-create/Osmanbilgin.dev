@@ -84,8 +84,24 @@ for (const p of ps) {
     // software renderers run at <1 fps; jump the camera clock so the frame is representative
     if (window.__snap) window.__snap(p);
   }, p);
-  // let the camera settle
+  // let the camera settle, and wait until the DOM panel for this progress is on screen
   await new Promise((r) => setTimeout(r, has("nogl") ? 400 : Number(get("settle", 4000))));
+  if (!has("nogl")) {
+    for (let i = 0; i < 40; i++) {
+      const ok = await page.evaluate((p) => {
+        const secs = [...document.querySelectorAll("section.section")];
+        const near = secs
+          .map((s) => ({ s, d: Math.abs(Number(s.dataset.anchor) - p) }))
+          .sort((a, b) => a.d - b.d)[0];
+        const stats = window.__stats ? window.__stats() : null;
+        const rigOk = !stats || Math.abs(stats.rigP - p) < 0.01;
+        return (!near || near.d > 0.06 || near.s.dataset.hidden === "false") && rigOk;
+      }, p);
+      if (ok) break;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
   const file = path.join(out, `${tag}-${mobile ? "mobile" : "desktop"}-p${p.toFixed(2)}.png`);
   await page.screenshot({ path: file });
   console.log("saved", file);

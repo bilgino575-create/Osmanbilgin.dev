@@ -1,7 +1,9 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   CanvasTexture,
   Color,
@@ -58,15 +60,10 @@ export default function Monitor() {
   );
   const bezel = useMemo(() => new RoundedBoxGeometry(mon.w + 0.03, mon.h + 0.03, 0.018, 3, 0.006), [mon.w, mon.h]);
   const base = useMemo(() => new RoundedBoxGeometry(0.26, 0.012, 0.18, 3, 0.005), []);
-  useEffect(
-    () => () => {
-      texture.dispose();
-      material.dispose();
-      bezel.dispose();
-      base.dispose();
-    },
-    [texture, material, bezel, base]
-  );
+  useDispose(texture);
+  useDispose(material);
+  useDispose(bezel);
+  useDispose(base);
 
   const light = useRef<PointLight>(null);
   const on = useRef(0);

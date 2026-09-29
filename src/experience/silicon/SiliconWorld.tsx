@@ -1,5 +1,7 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -448,29 +450,24 @@ export default function SiliconWorld() {
     }
   }, [blocks, labelSets, TRACES]);
 
-  useEffect(
-    () => () => {
-      dieMat.dispose();
-      boardMat.dispose();
-      blockGeo.dispose();
-      blockMat.dispose();
-      traceGeo.dispose();
-      traceMat.dispose();
-      labelSets.atlas.dispose();
-      labelMat.dispose();
-      streamLabelMat.dispose();
-      serviceLabelGeo.dispose();
-      streamGeo.dispose();
-      gaugeGeo.dispose();
-      gaugeMat.dispose();
-      gaugeLabelGeo.dispose();
-      compGeo.dispose();
-      capGeo.dispose();
-      compMat.dispose();
-      capMat.dispose();
-    },
-    [dieMat, boardMat, blockGeo, blockMat, traceGeo, traceMat, labelSets, labelMat, streamLabelMat, serviceLabelGeo, streamGeo, gaugeGeo, gaugeMat, gaugeLabelGeo, compGeo, capGeo, compMat, capMat]
-  );
+  useDispose(dieMat);
+  useDispose(boardMat);
+  useDispose(blockGeo);
+  useDispose(blockMat);
+  useDispose(traceGeo);
+  useDispose(traceMat);
+  useDispose(labelSets.atlas);
+  useDispose(labelMat);
+  useDispose(streamLabelMat);
+  useDispose(serviceLabelGeo);
+  useDispose(streamGeo);
+  useDispose(gaugeGeo);
+  useDispose(gaugeMat);
+  useDispose(gaugeLabelGeo);
+  useDispose(compGeo);
+  useDispose(capGeo);
+  useDispose(compMat);
+  useDispose(capMat);
 
   // bezier for the instruction stream: from the I/O edge through the cache into the cores
   const P0 = useMemo(() => new Vector3(4.2, 0.25, 3.6), []);

@@ -1,7 +1,9 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { CanvasTexture, LinearFilter, MeshBasicMaterial, PointLight, SRGBColorSpace } from "three";
 import { RoundedBoxGeometry } from "three-stdlib";
 import { L } from "./layout";
@@ -109,14 +111,9 @@ export default function Phone() {
   }, [canvas]);
   const screenMat = useMemo(() => new MeshBasicMaterial({ map: texture, toneMapped: false }), [texture]);
   const bodyGeo = useMemo(() => new RoundedBoxGeometry(0.072, 0.0075, 0.148, 4, 0.003), []);
-  useEffect(
-    () => () => {
-      texture.dispose();
-      screenMat.dispose();
-      bodyGeo.dispose();
-    },
-    [texture, screenMat, bodyGeo]
-  );
+  useDispose(texture);
+  useDispose(screenMat);
+  useDispose(bodyGeo);
   const light = useRef<PointLight>(null);
   const lit = useRef(0.25);
   const lastDraw = useRef({ lit: -1, sent: false, minute: -1 });

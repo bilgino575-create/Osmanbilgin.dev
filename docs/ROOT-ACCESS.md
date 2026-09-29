@@ -171,10 +171,22 @@ have explicit heights); ≤ 120 draw calls per act on HIGH.
 
 ## 6. Renderer decision
 
-WebGL2 via `THREE.WebGLRenderer`. WebGPU was evaluated and rejected for this
-build: `@react-three/postprocessing` / `postprocessing` are WebGL-only, and
-the TSL node post pipeline would mean maintaining every effect twice.
-Details in §9 of this document once the build is measured.
+WebGL2 via `THREE.WebGLRenderer`, always. WebGPU was evaluated and not
+shipped, for three concrete reasons:
+
+1. The post-processing stack (`postprocessing` and its React bindings) is a
+   WebGL pipeline. Selective bloom, DoF, SMAA and the two custom effects
+   (dive, heat haze) have no WebGPU path; keeping WebGPU would mean a second
+   TSL post pipeline and every effect written twice.
+2. Every custom material here is a GLSL `ShaderMaterial` (rain, screen,
+   steam, die, traces, gauges, tunnel, globe, labels). WebGPURenderer needs
+   node materials; a dual GLSL/TSL codebase doubles the surface to keep in
+   sync for no visual gain at this scene's size.
+3. The renderer must be chosen before the canvas exists, so "try WebGPU,
+   fall back" adds an async probe on the critical path of the 3D chunk.
+
+The brief's rule was to keep WebGPU only if everything, including post,
+worked. It does not, so the build stays on WebGL2.
 
 ## 7. Fallback plan
 
@@ -201,6 +213,65 @@ Details in §9 of this document once the build is measured.
 Removed: `framer-motion`, `gsap`, `react-icons`, `lucide-react` from the client
 bundle (icons are rendered server-side only from `icons.ts`).
 
-## 9. Measurements and known limitations
+## 9. Techniques
 
-Filled in at the end of the build; see the "Report" section appended below.
+- **One canvas, four worlds.** Worlds sit 300 units apart on y; the rig cuts
+  between them and the `Dive` post effect covers the cut. Only worlds inside
+  the current progress window are `visible`, so draw calls stay per-act.
+- **Scroll is the only clock.** `p ∈ [0,1]` is written by the scroll driver
+  and damped in the rig (`maath/easing.damp`). Reduced motion snaps `p` to
+  stop keys instead of damping, so the camera cuts.
+- **The OS is a texture, not DOM.** Window classes draw into their own
+  2× canvases only when dirty; the compositor draws them into the monitor
+  texture; in Act II each canvas is its own glass pane. Pointer rays hit the
+  mesh, UV → window pixels; keyboard is routed while `osFocus` is set.
+- **Real boot.** The BIOS/kernel log lines are the store's boot log: WebGL2
+  context, renderer, GPU tier, shader compile (`compileAsync`), rapier wasm,
+  fonts. There is no percentage anywhere.
+- **Sources at build time.** `scripts/embed-sources.mjs` (prebuild) embeds
+  eleven curated files and `git log --oneline --graph` of this repository.
+- **Instancing everywhere.** Keycaps (61, legend atlas with per-instance UV
+  rect and glow via `onBeforeCompile`), steam quads, traces, blocks, labels,
+  streams, gauges, packets, arcs, facade windows, rain. Per-frame updates
+  touch existing typed arrays; scratch vectors live at module scope.
+- **Procedural everything.** Rain/city, screen glass with subpixel mask,
+  iridescent die, gauge dials, fibre tunnel, dot-matrix globe from a
+  hand-authored land mask, facade. No files are downloaded at runtime except
+  the self-hosted `detect-gpu` benchmark JSON under `/benchmarks`.
+- **Tiers with hysteresis.** `detect-gpu` picks the start; PerformanceMonitor
+  needs two low windows to drop, three high windows to rise, then locks for
+  six seconds; `?tier=` forces one.
+- **HTML first.** The document is complete without the canvas; panels are
+  positioned by progress in 3D mode; keyboard focus inside a hidden section
+  scrolls the section (and the camera) into view.
+
+## 10. Measurements
+
+All numbers below were measured in the build container on the Playwright
+Chromium with SwiftShader (software WebGL, no GPU). They describe this
+machine; a mid-range laptop GPU has not been measured in this session.
+
+MEASUREMENTS_TABLE
+
+## 11. Known limitations (honest)
+
+- **Frame rate on real hardware is unmeasured.** The only GPU available here
+  is SwiftShader, which renders this scene at well under 1 fps. The 60/40 fps
+  targets are engineered for (instancing, tiers, dpr caps, world culling)
+  but not verified on a laptop or a phone.
+- **Lighthouse numbers come from the software renderer.** Total Blocking
+  Time is dominated by the CPU rasterising WebGL; a device with a GPU will
+  see a very different TBT. Accessibility, best practices and SEO scores do
+  not depend on the GPU.
+- **Continent outlines are hand-authored** at coarse resolution. They read
+  correctly as a dot-matrix globe; they are not a survey-grade dataset.
+- **The OS windows are canvas textures**, so their text is rendered at 2×
+  OS pixels. Very close to the glass the subpixel mask takes over by design.
+- **Project links.** `data.ts` has no real URLs for the projects, so the
+  project windows say "private client work" instead of linking anywhere.
+- **Testimonials** stay hidden until an entry is marked `verified: true`.
+- **Sound** is synthesized and off by default; the toggle is the only way in.
+- **Duck physics** loads rapier lazily (≈240 KB gzip); until it arrives a
+  static duck is shown.
+- **Initial JS** is 195 KB gzip, inside the 200 KB budget but with little
+  margin; the largest slice is the Next/React runtime.

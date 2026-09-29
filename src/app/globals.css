@@ -6,7 +6,7 @@
   --surface-2: #121218;
   --text: #f4f4f5;
   --text-2: #a1a1aa;
-  --muted: #63636b;
+  --muted: #7d7d89;
   --cyan: #00f5ff;
   --violet: #7c3aed;
   --green: #00ff88;
@@ -187,6 +187,12 @@ html.gl #home .panel {
   }
   html.gl #home .panel-body {
     max-height: 72dvh;
+  }
+  html.gl #end .panel {
+    align-items: center;
+  }
+  html.gl #end .panel-body {
+    padding-bottom: 7rem;
   }
 }
 html.gl .section[data-hidden="true"] .panel {
@@ -606,13 +612,13 @@ html:not(.gl) .glass {
 /* progress rail */
 .rail {
   position: fixed;
-  right: 14px;
+  right: 6px;
   top: 50%;
   translate: 0 -50%;
   z-index: 30;
   display: none;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
 }
 html.gl .rail {
   display: flex;
@@ -623,13 +629,21 @@ html.gl .rail {
   }
 }
 .rail a {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+}
+.rail a::before {
+  content: "";
   width: 6px;
   height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   transition: background 0.3s, transform 0.3s;
 }
-.rail a[aria-current="true"] {
+.rail a[aria-current="true"]::before {
   background: var(--cyan);
   box-shadow: 0 0 10px var(--cyan);
   transform: scale(1.3);

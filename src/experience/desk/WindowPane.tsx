@@ -1,7 +1,9 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Color, DoubleSide, ShaderMaterial, Vector3 } from "three";
 import { L } from "./layout";
 import { windowFragment, windowVertex } from "./shaders/window";
@@ -29,7 +31,7 @@ export default function WindowPane() {
       }),
     [w.w, w.h]
   );
-  useEffect(() => () => material.dispose(), [material]);
+  useDispose(material);
 
   useFrame((state) => {
     const s = store.get();

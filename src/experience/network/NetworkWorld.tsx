@@ -1,5 +1,7 @@
 "use client";
 
+import { useDispose } from "../utils/useDispose";
+
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -348,31 +350,26 @@ export default function NetworkWorld() {
     }
   }, [nodes, links, atlas, PACKETS]);
 
-  useEffect(
-    () => () => {
-      tunnelGeo.dispose();
-      tunnelMat.dispose();
-      packetGeo.dispose();
-      packetMat.dispose();
-      mask.dispose();
-      globeMat.dispose();
-      atmoMat.dispose();
-      nodeGeo.dispose();
-      ringGeo.dispose();
-      ringGeoInst.dispose();
-      ringMat.dispose();
-      atlas.dispose();
-      labelMat.dispose();
-      nodeLabelGeo.dispose();
-      stageLabelGeo.dispose();
-      stageDotGeo.dispose();
-      arcGeo.dispose();
-      arcMat.dispose();
-      stars.g.dispose();
-      stars.m.dispose();
-    },
-    [tunnelGeo, tunnelMat, packetGeo, packetMat, mask, globeMat, atmoMat, nodeGeo, ringGeo, ringGeoInst, ringMat, atlas, labelMat, nodeLabelGeo, stageLabelGeo, stageDotGeo, arcGeo, arcMat, stars]
-  );
+  useDispose(tunnelGeo);
+  useDispose(tunnelMat);
+  useDispose(packetGeo);
+  useDispose(packetMat);
+  useDispose(mask);
+  useDispose(globeMat);
+  useDispose(atmoMat);
+  useDispose(nodeGeo);
+  useDispose(ringGeo);
+  useDispose(ringGeoInst);
+  useDispose(ringMat);
+  useDispose(atlas);
+  useDispose(labelMat);
+  useDispose(nodeLabelGeo);
+  useDispose(stageLabelGeo);
+  useDispose(stageDotGeo);
+  useDispose(arcGeo);
+  useDispose(arcMat);
+  useDispose(stars.g);
+  useDispose(stars.m);
 
   const processSection = SECTIONS.find((s) => s.id === "process")!;
   const globeRef = useRef<Group>(null);

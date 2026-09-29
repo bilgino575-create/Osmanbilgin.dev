@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { useDisposeAll } from "../utils/useDispose";
 import { CanvasTexture, LinearFilter, MeshStandardMaterial, SRGBColorSpace } from "three";
 import { L } from "./layout";
 import { display, resolveFonts } from "../os/draw";
@@ -69,14 +70,8 @@ export default function StickyNotes() {
       }),
     []
   );
-  useEffect(
-    () => () =>
-      mats.forEach((m) => {
-        m.map?.dispose();
-        m.dispose();
-      }),
-    [mats]
-  );
+  // the note textures belong to the materials: dispose both together
+  useDisposeAll(useMemo(() => mats.map((m) => ({ dispose: () => { m.map?.dispose(); m.dispose(); } })), [mats]));
   return (
     <group>
       {NOTES.map((n, i) => (
