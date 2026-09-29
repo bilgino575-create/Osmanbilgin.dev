@@ -15,7 +15,7 @@ export default function Services() {
   return (
     <Section id="services">
       <div className="wrap">
-        <div className="glass max-w-[70rem] p-6 sm:p-9">
+        <div className="glass max-w-[46rem] p-6 sm:p-9">
           <p className="eyebrow mb-4">
             <b>lscpu</b> --services
           </p>
@@ -24,7 +24,7 @@ export default function Services() {
             <br />
             on one die.
           </h2>
-          <ul className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
             {services.map((s) => {
               const Icon = getIcon(s.icon);
               return (
@@ -35,8 +35,8 @@ export default function Services() {
                     </span>
                     <span className="tag">{blockLabel[s.block]}</span>
                   </div>
-                  <h3 className="mt-3 font-medium leading-tight">{s.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-text-2">
+                  <h3 className="mt-2.5 text-[15px] font-medium leading-tight">{s.title}</h3>
+                  <p className="mt-1 text-[13px] leading-relaxed text-text-2">
                     {s.description}
                   </p>
                 </li>

@@ -46,12 +46,13 @@ export default function Signal() {
       z = o[2] + 0.9;
       scale = 0.7;
     } else if (p < 0.7) {
+      // runs along the traces from the I/O edge to the gauges
       const o = WORLD_OFFSET.silicon;
       const k = smoothstep(0.47, 0.7, p);
-      x = o[0] + 3 - 9 * k;
-      y = o[1] + 0.12;
-      z = o[2] + Math.sin(k * 9) * 1.2 - k * 3;
-      scale = 0.35;
+      x = o[0] + 3.8 - 8.4 * k;
+      y = o[1] + 0.05;
+      z = o[2] + 3.2 - 4.6 * k + Math.sin(k * 14) * 0.5;
+      scale = 0.3;
     } else if (p < 0.875) {
       const o = WORLD_OFFSET.network;
       const k = smoothstep(0.7, 0.875, p);

@@ -40,9 +40,9 @@ export const DESKTOP_KEYS: Key[] = [
   // ACT III — the silicon
   { p: 0.475, world: "silicon", pos: [0, 26, 22], tgt: [0, 0, 0], fov: 34 },
   { p: 0.52, world: "silicon", pos: [0, 9, 8.5], tgt: [0, 0, 0], fov: 34 },
-  { p: 0.55, world: "silicon", pos: [1.2, 4.2, 4.4], tgt: [0.6, 0, 0], fov: 36, stop: true },
+  { p: 0.55, world: "silicon", pos: [3.2, 4.0, 4.6], tgt: [1.2, 0, 0], fov: 36, stop: true },
   { p: 0.6, world: "silicon", pos: [-1.4, 2.2, 2.6], tgt: [-1.8, 0.1, -0.4], fov: 38 },
-  { p: 0.645, world: "silicon", pos: [-3.0, 1.35, 1.6], tgt: [-3.4, 0.3, -0.6], fov: 40, stop: true },
+  { p: 0.645, world: "silicon", pos: [-3.3, 1.4, 1.7], tgt: [-3.7, 0.3, -0.7], fov: 40, stop: true },
   { p: 0.7, world: "silicon", pos: [-4.2, 0.35, -1.2], tgt: [-6, 0.2, -3.4], fov: 44 },
   // ACT IV — the network
   { p: 0.705, world: "network", pos: [0, 0, 30], tgt: [0, 0, -40], fov: 60 },
