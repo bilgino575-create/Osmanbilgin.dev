@@ -108,6 +108,27 @@ html.gl .static-bg {
   display: none;
 }
 
+/* while the on-screen OS owns the keyboard, the page does not scroll */
+html.os-focus {
+  overflow: hidden;
+}
+.os-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  translate: -50% 0;
+  z-index: 45;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-2);
+  background: rgba(8, 8, 12, 0.8);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  pointer-events: none;
+}
+
 /* ---------- Canvas layer ---------- */
 .gl-layer {
   position: fixed;

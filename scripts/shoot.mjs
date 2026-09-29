@@ -81,6 +81,8 @@ for (const p of ps) {
   await page.evaluate((p) => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo({ top: p * max, behavior: "auto" });
+    // software renderers run at <1 fps; jump the camera clock so the frame is representative
+    if (window.__snap) window.__snap(p);
   }, p);
   // let the camera settle
   await new Promise((r) => setTimeout(r, has("nogl") ? 400 : Number(get("settle", 4000))));

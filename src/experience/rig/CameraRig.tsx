@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { PerspectiveCamera, Vector3 } from "three";
 import { damp } from "maath/easing";
 import { store } from "@/lib/store";
+import { actAt } from "@/lib/acts";
 import { DESKTOP_KEYS, MOBILE_KEYS, WORLD_OFFSET, type Key, type WorldId, worldAt } from "./keyframes";
 import { smoothstep, v3a, v3b, v3c } from "../utils/scratch";
 
@@ -19,7 +20,17 @@ export const rig = {
   cuts: 0,
   target: new Vector3(),
   keys: DESKTOP_KEYS,
+  /** jump the smoothed clock (used by tests and screenshots) */
+  snap: (p: number) => {
+    void p;
+  },
 };
+
+declare global {
+  interface Window {
+    __snap?: (p: number) => void;
+  }
+}
 
 function sample(keys: Key[], p: number, outPos: Vector3, outTgt: Vector3): { fov: number; world: WorldId } {
   let i = 0;
@@ -68,6 +79,21 @@ export default function CameraRig() {
     camera.near = 0.03;
     camera.far = 200;
     camera.updateProjectionMatrix();
+    rig.snap = (p: number) => {
+      smoothed.current.p = p;
+      rig.p = p;
+      rig.dive = 0;
+      lastWorld.current = sample(keys, p, v3a, v3b).world;
+      rig.world = lastWorld.current;
+    };
+    window.__snap = (p: number) => {
+      window.scrollTo({ top: p * (document.documentElement.scrollHeight - window.innerHeight), behavior: "auto" });
+      store.set({ progress: p, act: actAt(p) });
+      rig.snap(p);
+    };
+    return () => {
+      delete window.__snap;
+    };
   }, [keys, camera]);
 
   useFrame((_, dt) => {

@@ -26,6 +26,8 @@ export abstract class OsWindow {
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
   dirty = true;
+  /** bumps on every redraw so textures know when to re-upload */
+  version = 0;
   focused = false;
   hover = false;
   /** last hover position in window-local pixels */
@@ -67,6 +69,7 @@ export abstract class OsWindow {
   render(now: number) {
     if (!this.dirty) return false;
     this.dirty = false;
+    this.version++;
     const { ctx } = this;
     ctx.setTransform(OS.SCALE, 0, 0, OS.SCALE, 0, 0);
     const { w, h } = this.rect;
@@ -111,6 +114,10 @@ export abstract class OsWindow {
     ctx.translate(body.x, body.y);
     this.drawBody(ctx, { x: 0, y: 0, w: body.w, h: body.h }, now);
     ctx.restore();
+    // window edge
+    ctx.strokeStyle = this.focused ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
     return true;
   }
 

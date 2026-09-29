@@ -50,6 +50,7 @@ export default function Monitor() {
           uRes: { value: new Vector2(OS.W, OS.H) },
           uReflA: { value: new Color("#7c3aed") },
           uReflB: { value: new Color("#00f5ff") },
+          uRefl: { value: 1 },
           uTime: { value: 0 },
         },
       }),

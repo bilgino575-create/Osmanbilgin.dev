@@ -25,6 +25,7 @@ uniform float uOn;        // 0 = off (black glass), 1 = on
 uniform vec2  uRes;       // texture resolution
 uniform vec3  uReflA;     // violet room light
 uniform vec3  uReflB;     // cyan strip
+uniform float uRefl;      // strength of the room reflection
 uniform float uTime;
 varying vec2 vUv;
 varying vec3 vNormalW;
@@ -46,7 +47,7 @@ void main() {
   // fresnel reflection of the room
   float f = pow(1.0 - max(dot(normalize(vNormalW), normalize(vViewDirW)), 0.0), 4.0);
   vec3 refl = mix(uReflA, uReflB, uv.y) * 0.035 + vec3(0.02);
-  col += refl * (0.6 + f * 3.0) * (1.0 - uOn * 0.5);
+  col += refl * (0.6 + f * 3.0) * (1.0 - uOn * 0.5) * uRefl;
   // edge vignette of the panel
   float vig = smoothstep(0.0, 0.03, uv.x) * smoothstep(1.0, 0.97, uv.x) * smoothstep(0.0, 0.04, uv.y) * smoothstep(1.0, 0.96, uv.y);
   col *= 0.86 + 0.14 * vig;

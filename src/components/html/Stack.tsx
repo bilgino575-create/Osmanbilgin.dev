@@ -5,9 +5,9 @@ import { Section } from "./Track";
 
 export default function Stack() {
   return (
-    <Section id="stack">
+    <Section id="stack" align="left">
       <div className="wrap">
-        <div className="glass max-w-[64rem] p-6 sm:p-9">
+        <div className="glass max-w-[42rem] p-6 sm:p-9">
           <p className="eyebrow mb-4">
             <b>ls</b> ~/stack
           </p>
@@ -34,7 +34,7 @@ export default function Stack() {
             })}
           </ul>
 
-          <div className="mt-7 grid gap-6 md:grid-cols-2">
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
             {techCategories.map((cat) => (
               <div key={cat.id}>
                 <h3 className="eyebrow mb-1">{cat.id}/</h3>

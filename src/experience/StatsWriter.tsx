@@ -3,6 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { store } from "@/lib/store";
+import { rig } from "./rig/CameraRig";
 
 declare global {
   interface Window {
@@ -22,6 +23,9 @@ export default function StatsWriter() {
       gpuTier: store.get().gpuTier,
       act: store.get().act,
       progress: store.get().progress,
+      rigP: rig.p,
+      dive: rig.dive,
+      world: rig.world,
       memory: gl.info.memory,
       programs: gl.info.programs?.length ?? 0,
     });

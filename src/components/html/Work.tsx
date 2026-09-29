@@ -3,9 +3,9 @@ import { Section } from "./Track";
 
 export default function Work() {
   return (
-    <Section id="work">
+    <Section id="work" align="right">
       <div className="wrap">
-        <div className="glass max-w-[70rem] p-6 sm:p-9">
+        <div className="glass ml-auto max-w-[40rem] p-6 sm:p-9">
           <p className="eyebrow mb-4">
             <b>tree</b> ~/projects
           </p>
@@ -14,17 +14,17 @@ export default function Work() {
             <br />
             Every one shipped.
           </h2>
-          <ul className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
             {projects.map((p) => (
               <li key={p.slug} className="card flex flex-col" id={`project-${p.slug}`}>
                 <p className="eyebrow">
                   <b>▸</b> {p.slug}/
                 </p>
-                <h3 className="mt-2 text-lg font-medium leading-tight">{p.title}</h3>
+                <h3 className="mt-1.5 text-base font-medium leading-tight">{p.title}</h3>
                 <p className="mono mt-1 text-[11px] uppercase tracking-[0.16em] text-muted">
                   {p.category}
                 </p>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-text-2">
+                <p className="mt-2 flex-1 text-[13px] leading-relaxed text-text-2">
                   {p.description}
                 </p>
                 <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Technologies">

@@ -38,12 +38,13 @@ export default function Signal() {
       z = L.keyboard.z + (L.monitor.z + 0.02 - L.keyboard.z) * k;
       scale = 0.4 + k * 0.6;
     } else if (p < 0.47) {
+      // rides the terminal → editor → explorer, always at the window edge
       const o = WORLD_OFFSET.screen;
-      const k = smoothstep(0.2, 0.47, p);
-      x = o[0] - 2.6 + 5.3 * k;
-      y = o[1] - 1.3 + Math.sin(t * 1.5) * 0.05;
-      z = o[2] + 0.4;
-      scale = 0.5;
+      const k = smoothstep(0.22, 0.46, p);
+      x = o[0] + (k < 0.5 ? -4.9 + 9.8 * (k * 2) : 4.9 - 7.5 * ((k - 0.5) * 2));
+      y = o[1] + (k < 0.5 ? 2.8 : 2.8 - 5.2 * ((k - 0.5) * 2)) + Math.sin(t * 1.5) * 0.05;
+      z = o[2] + 0.9;
+      scale = 0.7;
     } else if (p < 0.7) {
       const o = WORLD_OFFSET.silicon;
       const k = smoothstep(0.47, 0.7, p);

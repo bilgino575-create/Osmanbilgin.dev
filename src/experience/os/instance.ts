@@ -2,7 +2,7 @@
 
 import { ScreenOS } from "./ScreenOS";
 import { store } from "@/lib/store";
-import { scrollToHash } from "@/lib/scroll";
+import { getLenis, scrollToHash } from "@/lib/scroll";
 
 let os: ScreenOS | null = null;
 
@@ -44,10 +44,18 @@ export function getOS(): ScreenOS {
     { capture: true }
   );
 
-  // keep the boot log mirrored on the monitor
+  // keep the boot log mirrored on the monitor; hand the wheel to the OS while it has focus
+  let lastFocus = false;
   store.subscribe(() => {
     const s = store.get();
     os!.bootLog(s.bootLog, s.booted);
+    if (s.osFocus !== lastFocus) {
+      lastFocus = s.osFocus;
+      document.documentElement.classList.toggle("os-focus", s.osFocus);
+      const lenis = getLenis();
+      if (s.osFocus) lenis?.stop();
+      else lenis?.start();
+    }
   });
   return os;
 }

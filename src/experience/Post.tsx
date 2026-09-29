@@ -49,8 +49,11 @@ export default function Post() {
     if (d) {
       // focus on the rig target; bokeh subtle on the desk, larger inside the machine
       d.target = rig.target;
-      const scale = rig.world === "desk" ? 2.2 : rig.world === "screen" ? 1.2 : 2.8;
+      const scale = rig.world === "desk" ? 2.2 : rig.world === "screen" ? 1.0 : 2.4;
       if (Math.abs(d.bokehScale - scale) > 0.01) d.bokehScale = scale;
+      const range = rig.world === "desk" ? 0.6 : rig.world === "screen" ? 5 : 6;
+      const cc = d.cocMaterial;
+      if (Math.abs(cc.worldFocusRange - range) > 0.01) cc.worldFocusRange = range;
     }
   });
 

@@ -4,9 +4,9 @@ import { Section } from "./Track";
 
 export default function About() {
   return (
-    <Section id="about">
+    <Section id="about" align="right">
       <div className="wrap">
-        <div className="glass max-w-[62rem] p-6 sm:p-9">
+        <div className="glass ml-auto max-w-[36rem] p-6 sm:p-9">
           <p className="eyebrow mb-4">
             <b>cat</b> ~/about.md
           </p>

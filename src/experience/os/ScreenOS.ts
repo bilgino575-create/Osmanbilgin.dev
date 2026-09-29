@@ -29,6 +29,7 @@ export class ScreenOS {
   /** true when the composite texture must be re-uploaded */
   compositeDirty = true;
   backdropDirty = true;
+  backdropVersion = 0;
   private bootLines: BootLine[] = [];
   private phaseStart = 0;
   private lastClock = "";
@@ -151,6 +152,7 @@ export class ScreenOS {
       this.backdropDirty = true;
       this.compositeDirty = true;
       this.windows.forEach((w) => (w.dirty = true));
+      this.terminal.autorun("neofetch");
     }
     if (this.phase === "post" && now - this.phaseStart > 1400) {
       this.phase = "kernel";
@@ -212,6 +214,7 @@ export class ScreenOS {
 
   private drawBackdrop() {
     this.backdropDirty = false;
+    this.backdropVersion++;
     const ctx = this.bctx;
     const { W, H, TASKBAR } = OS;
     const g = ctx.createLinearGradient(0, 0, W, H);

@@ -8,6 +8,7 @@ import SoundToggle from "./SoundToggle";
 import Cursor from "./Cursor";
 import BootOverlay from "./BootOverlay";
 import Rail from "./Rail";
+import OsHint from "./OsHint";
 
 /** Everything client-side that sits around the document. */
 export default function Chrome() {
@@ -17,6 +18,7 @@ export default function Chrome() {
       <ExperienceLoader />
       <Rail />
       <BootOverlay />
+      <OsHint />
       <CommandPalette />
       <DebugHud />
       <SoundToggle />
