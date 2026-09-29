@@ -133,7 +133,8 @@ html.gl .track > .section {
   left: 0;
   right: 0;
   top: calc(var(--from) * 100%);
-  height: calc((var(--to) - var(--from)) * 100%);
+  /* one extra viewport so the sticky panel never reaches the section's end and slides away */
+  height: calc((var(--to) - var(--from)) * 100% + 100dvh);
   pointer-events: none;
 }
 html.gl .panel {
@@ -147,6 +148,25 @@ html.gl .panel {
 }
 html.gl .panel > .panel-body {
   pointer-events: auto;
+}
+/* the hero copy sits on a soft darkening so it stays legible over the scene */
+html.gl #home .panel {
+  background: linear-gradient(90deg, rgba(5, 5, 7, 0.82) 0%, rgba(5, 5, 7, 0.5) 34%, rgba(5, 5, 7, 0) 62%);
+}
+@media (max-width: 767px) {
+  html.gl #home .panel {
+    background: linear-gradient(0deg, rgba(5, 5, 7, 0.9) 0%, rgba(5, 5, 7, 0.55) 55%, rgba(5, 5, 7, 0) 80%);
+  }
+  html.gl .panel {
+    align-items: flex-end;
+    padding-bottom: 1rem;
+  }
+  html.gl .panel-body {
+    max-height: 64dvh;
+  }
+  html.gl #home .panel-body {
+    max-height: 72dvh;
+  }
 }
 html.gl .section[data-hidden="true"] .panel {
   pointer-events: none;

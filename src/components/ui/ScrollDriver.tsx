@@ -36,7 +36,16 @@ export default function ScrollDriver() {
       }
     }
 
-    store.set({ touch, reducedMotion, debug, gl: glOk, glFailed: !glOk });
+    const tierParam = params.get("tier");
+    const tierLocked = tierParam === "high" || tierParam === "low";
+    store.set({
+      touch,
+      reducedMotion,
+      debug,
+      gl: glOk,
+      glFailed: !glOk,
+      ...(tierLocked ? { tier: tierParam as "high" | "low", tierLocked: true } : {}),
+    });
 
     if (glOk) {
       html.classList.add("gl");

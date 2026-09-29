@@ -69,8 +69,12 @@ page.on("console", (m) => {
 });
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 
-const target = has("nogl") ? `${url}?nogl` : url;
-await page.goto(target, { waitUntil: "networkidle0", timeout: 120000 });
+const q = [];
+if (has("nogl")) q.push("nogl");
+if (has("tier")) q.push(`tier=${get("tier", "high")}`);
+if (has("debug")) q.push("debug");
+const target = q.length ? `${url}?${q.join("&")}` : url;
+await page.goto(target, { waitUntil: "domcontentloaded", timeout: 120000 });
 await new Promise((r) => setTimeout(r, wait));
 
 for (const p of ps) {
@@ -79,7 +83,7 @@ for (const p of ps) {
     window.scrollTo({ top: p * max, behavior: "auto" });
   }, p);
   // let the camera settle
-  await new Promise((r) => setTimeout(r, has("nogl") ? 400 : 2600));
+  await new Promise((r) => setTimeout(r, has("nogl") ? 400 : Number(get("settle", 4000))));
   const file = path.join(out, `${tag}-${mobile ? "mobile" : "desktop"}-p${p.toFixed(2)}.png`);
   await page.screenshot({ path: file });
   console.log("saved", file);

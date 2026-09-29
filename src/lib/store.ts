@@ -33,6 +33,8 @@ export interface AppState {
   booted: boolean;
   bootLog: BootLine[];
   tier: Tier;
+  /** tier forced through ?tier=high|low, never changed by the monitor */
+  tierLocked: boolean;
   gpuTier: number;
   reducedMotion: boolean;
   touch: boolean;
@@ -44,6 +46,8 @@ export interface AppState {
   pointerY: number;
   /** a project slug opened from the OS or the HTML mirror */
   openProject: string | null;
+  /** the on-screen OS owns the keyboard (set by clicking a window) */
+  osFocus: boolean;
   /** last key typed, used by the keyboard mesh and the sound engine */
   keyEvent: { code: string; down: boolean; n: number };
   /** the visitor sent a message: drives the return packet in Act V */
@@ -71,6 +75,7 @@ const initial: AppState = {
   booted: false,
   bootLog: [],
   tier: "high",
+  tierLocked: false,
   gpuTier: -1,
   reducedMotion: false,
   touch: false,
@@ -80,6 +85,7 @@ const initial: AppState = {
   pointerX: 0,
   pointerY: 0,
   openProject: null,
+  osFocus: false,
   keyEvent: { code: "", down: false, n: 0 },
   sentAt: 0,
   stats: {
