@@ -9,7 +9,7 @@ import {
   InstancedBufferAttribute,
   InstancedMesh,
   Matrix4,
-  MeshStandardMaterial,
+  MeshBasicMaterial,
   PlaneGeometry,
   ShaderMaterial,
 } from "three";
@@ -31,17 +31,19 @@ export default function Exterior() {
   const facade = useRef<InstancedMesh>(null);
   const rain = useRef<InstancedMesh>(null);
 
-  const COLS = 11;
-  const ROWS = 9;
-  const winGeo = useMemo(() => new PlaneGeometry(1.3, 1.0), []);
-  const winMat = useMemo(
-    () => new MeshStandardMaterial({ color: "#0a0a10", emissive: "#ffd9a0", emissiveIntensity: 0, roughness: 0.4 }),
-    []
-  );
+  const COLS = 19;
+  const ROWS = 15;
+  const winGeo = useMemo(() => {
+    const g = new PlaneGeometry(0.95, 0.72);
+    g.rotateY(Math.PI); // faces -z: seen from the street
+    return g;
+  }, []);
+  // instance colour is the window's light: dark glass or a lit room (HDR so it blooms)
+  const winMat = useMemo(() => new MeshBasicMaterial({ color: "#ffffff", toneMapped: false }), []);
   // rain streaks
   const RAIN = 900;
   const rainGeo = useMemo(() => {
-    const g = new PlaneGeometry(0.006, 0.35);
+    const g = new PlaneGeometry(0.0022, 0.16);
     const seeds = new Float32Array(RAIN * 3);
     const r = rng(11);
     for (let i = 0; i < RAIN; i++) {
@@ -74,7 +76,7 @@ export default function Exterior() {
         fragmentShader: /* glsl */ `
           uniform vec3 uColor;
           varying float vA;
-          void main() { gl_FragColor = vec4(uColor, vA * 0.35); }`,
+          void main() { gl_FragColor = vec4(uColor, vA * 0.22); }`,
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
@@ -117,18 +119,22 @@ export default function Exterior() {
     const litColor = new Color();
     for (let row = 0; row < ROWS; row++) {
       for (let col = 0; col < COLS; col++) {
-        const x = (col - 5) * 2.4 + 0.9;
-        const y = row * 2.1 + 0.62 - 2.1; // our window is row 1 → y ≈ L.window.y
-        mat.makeTranslation(x, y + 1.0, L.wallZ - 0.13);
+        const x = (col - 9) * 1.6 + L.window.x;
+        const y = (row - 2) * 1.4 + L.window.y; // our window is (col 9, row 2)
+        mat.makeTranslation(x, y, L.wallZ - 0.17);
         f.setMatrixAt(i, mat);
-        // our room's window is left transparent (col 5,row 1) → hide with scale 0
-        const ours = col === 5 && row === 1;
+        // our room's window is the real opening → hide this instance
+        const ours = col === 9 && row === 2;
         if (ours) {
           mat.makeScale(0, 0, 0);
           f.setMatrixAt(i, mat);
         }
-        const lit = !ours && r() < 0.12;
-        litColor.set(lit ? (r() < 0.5 ? "#ffd9a0" : "#8ec8ff") : "#000000");
+        const lit = !ours && r() < 0.22;
+        if (lit) {
+          litColor.set(r() < 0.6 ? "#ffd9a0" : "#8ec8ff").multiplyScalar(0.9 + r() * 0.9);
+        } else {
+          litColor.set("#06070c");
+        }
         f.setColorAt(i, litColor);
         i++;
       }
@@ -139,7 +145,7 @@ export default function Exterior() {
     if (rn) {
       const rr = rng(5);
       for (let k = 0; k < RAIN; k++) {
-        mat.makeTranslation((rr() - 0.5) * 14, 0, L.wallZ - 1 - rr() * 9);
+        mat.makeTranslation((rr() - 0.5) * 16, 0, L.wallZ - 2.5 - rr() * 9);
         rn.setMatrixAt(k, mat);
       }
       rn.instanceMatrix.needsUpdate = true;
@@ -160,17 +166,50 @@ export default function Exterior() {
 
   return (
     <group ref={group} visible={false}>
-      {/* facade wall (outside face) */}
-      <mesh position={[0.9, 9, L.wallZ - 0.14]} rotation-y={Math.PI} material={m.wall}>
-        <planeGeometry args={[30, 24]} />
-      </mesh>
-      <instancedMesh ref={facade} args={[winGeo, winMat, COLS * ROWS]} rotation-y={Math.PI} frustumCulled={false} />
+      {/* facade wall (outside face) built around the room's window opening */}
+      {(() => {
+        const w = L.window;
+        const z = L.wallZ - 0.15;
+        const left = w.x - w.w / 2;
+        const right = w.x + w.w / 2;
+        const bottom = w.y - w.h / 2;
+        const top = w.y + w.h / 2;
+        const X0 = w.x - 16;
+        const X1 = w.x + 16;
+        const Y0 = -6;
+        const Y1 = 24;
+        return (
+          <>
+            <mesh position={[(X0 + left) / 2, (Y0 + Y1) / 2, z]} rotation-y={Math.PI} material={m.wall}>
+              <planeGeometry args={[left - X0, Y1 - Y0]} />
+            </mesh>
+            <mesh position={[(right + X1) / 2, (Y0 + Y1) / 2, z]} rotation-y={Math.PI} material={m.wall}>
+              <planeGeometry args={[X1 - right, Y1 - Y0]} />
+            </mesh>
+            <mesh position={[w.x, (Y0 + bottom) / 2, z]} rotation-y={Math.PI} material={m.wall}>
+              <planeGeometry args={[w.w, bottom - Y0]} />
+            </mesh>
+            <mesh position={[w.x, (top + Y1) / 2, z]} rotation-y={Math.PI} material={m.wall}>
+              <planeGeometry args={[w.w, Y1 - top]} />
+            </mesh>
+          </>
+        );
+      })()}
+      <instancedMesh ref={facade} args={[winGeo, winMat, COLS * ROWS]} frustumCulled={false} />
       {/* window ledges */}
       {Array.from({ length: ROWS }, (_, row) => (
-        <mesh key={row} position={[0.9, row * 2.1 + 0.62 - 2.1 + 0.48, L.wallZ - 0.2]} material={m.plastic}>
-          <boxGeometry args={[28, 0.06, 0.14]} />
+        <mesh key={row} position={[L.window.x, (row - 2) * 1.4 + L.window.y - 0.42, L.wallZ - 0.22]} material={m.plastic}>
+          <boxGeometry args={[30, 0.05, 0.12]} />
         </mesh>
       ))}
+      {/* the one lit window: the room we were just in, glowing cyan-white from inside */}
+      <mesh position={[L.window.x, L.window.y, L.wallZ + 0.03]} rotation-y={Math.PI}>
+        <planeGeometry args={[L.window.w - 0.05, L.window.h - 0.05]} />
+        <meshBasicMaterial color={[0.5, 1.6, 1.8]} toneMapped={false} />
+      </mesh>
+      {/* street light on the facade */}
+      <directionalLight position={[-8, 3, -18]} target-position={[0.9, 6, -1.6]} intensity={1.1} color="#7a6cff" />
+      <directionalLight position={[10, 14, -20]} target-position={[0.9, 6, -1.6]} intensity={0.5} color="#56d6ff" />
       {/* far city backdrop */}
       <mesh position={[0.9, 6, L.wallZ - 60]} material={cityMat}>
         <planeGeometry args={[180, 60]} />

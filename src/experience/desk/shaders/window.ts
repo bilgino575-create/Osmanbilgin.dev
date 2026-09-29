@@ -151,6 +151,7 @@ void main() {
   float l2 = S(0.0, 0.5, rain);
   vec2 duv = auv * 2.6;
   vec2 c = drops(duv, t, l0, l1, l2);
+  vec3 m1 = dropLayer(duv, t) * l1;
   // normal from the drop field
   vec2 e = vec2(0.002, 0.0);
   float cx = drops(duv + e, t, l0, l1, l2).x;
@@ -171,9 +172,9 @@ void main() {
     gl_FragColor = vec4(col, 1.0);
   } else {
     // outside: transparent glass, drops as highlights, faint reflection of the sky
-    vec3 col = vec3(0.6, 0.85, 1.0) * (c.x * 0.6 + c.y * 0.25);
-    col += uTintA * 0.03;
-    float alpha = 0.08 + c.x * 0.5 + c.y * 0.2;
+    vec3 col = vec3(0.6, 0.85, 1.0) * (m1.x * 0.1 + c.y * 0.04);
+    col += uTintA * 0.01;
+    float alpha = 0.03 + m1.x * 0.1 + c.y * 0.04;
     gl_FragColor = vec4(col, alpha);
   }
   #include <tonemapping_fragment>

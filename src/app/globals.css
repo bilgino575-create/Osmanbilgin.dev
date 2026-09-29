@@ -154,13 +154,13 @@ html.gl .track > .section {
   left: 0;
   right: 0;
   top: calc(var(--from) * 100%);
-  /* one extra viewport so the sticky panel never reaches the section's end and slides away */
-  height: calc((var(--to) - var(--from)) * 100% + 100dvh);
+  height: calc((var(--to) - var(--from)) * 100%);
   pointer-events: none;
 }
+/* panels are fixed to the viewport; the section box only reserves scroll range */
 html.gl .panel {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0;
   height: 100dvh;
   display: flex;
   align-items: center;
@@ -226,6 +226,23 @@ html:not(.gl) .section:first-child {
   .wrap {
     width: min(100% - 6rem, 1200px);
   }
+}
+
+.site-footer {
+  position: relative;
+  z-index: 2;
+}
+html.gl .site-footer {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 3;
+  opacity: var(--footer-vis, 0);
+  pointer-events: none;
+  background: transparent;
+  border-top-color: transparent;
+}
+html.gl .site-footer a {
+  pointer-events: auto;
 }
 
 /* ---------- Glass ---------- */

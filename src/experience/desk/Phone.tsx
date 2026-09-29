@@ -17,12 +17,12 @@ const H = 780;
 function drawScreen(ctx: CanvasRenderingContext2D, lit: number, sent: boolean) {
   resolveFonts();
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#0b0c14");
-  g.addColorStop(1, "#05060a");
+  g.addColorStop(0, "#1a1d30");
+  g.addColorStop(1, "#0a0b14");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
   const r = ctx.createRadialGradient(W * 0.5, H * 0.2, 0, W * 0.5, H * 0.2, W);
-  r.addColorStop(0, `rgba(0,245,255,${0.18 * lit})`);
+  r.addColorStop(0, `rgba(0,245,255,${0.3 * lit})`);
   r.addColorStop(1, "rgba(0,245,255,0)");
   ctx.fillStyle = r;
   ctx.fillRect(0, 0, W, H);
@@ -48,7 +48,7 @@ function drawScreen(ctx: CanvasRenderingContext2D, lit: number, sent: boolean) {
   // notification card
   const y = 300;
   roundRect(ctx, 24, y, W - 48, sent ? 200 : 168, 22);
-  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
   ctx.fill();
   ctx.strokeStyle = `rgba(0,245,255,${0.25 + 0.5 * lit})`;
   ctx.lineWidth = 1.5;
@@ -108,7 +108,7 @@ export default function Phone() {
     return t;
   }, [canvas]);
   const screenMat = useMemo(() => new MeshBasicMaterial({ map: texture, toneMapped: false }), [texture]);
-  const bodyGeo = useMemo(() => new RoundedBoxGeometry(0.072, 0.0075, 0.148, 4, 0.006), []);
+  const bodyGeo = useMemo(() => new RoundedBoxGeometry(0.072, 0.0075, 0.148, 4, 0.003), []);
   useEffect(
     () => () => {
       texture.dispose();
@@ -137,14 +137,14 @@ export default function Phone() {
       drawScreen(canvas.getContext("2d")!, lit.current, sent);
       texture.needsUpdate = true;
     }
-    screenMat.color.setScalar(0.35 + lit.current * 1.1);
+    screenMat.color.setScalar(0.5 + lit.current * 1.4);
     if (light.current) light.current.intensity = lit.current * 0.35;
   });
 
   return (
     <group position={[L.phone.x, L.deskY + 0.004, L.phone.z]} rotation-y={-0.35}>
       <mesh geometry={bodyGeo} material={m.phone} castShadow receiveShadow />
-      <mesh material={screenMat} position={[0, 0.0039, 0]} rotation-x={-Math.PI / 2}>
+      <mesh material={screenMat} position={[0, 0.0041, 0]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[0.066, 0.142]} />
       </mesh>
       {/* camera bump */}

@@ -9,6 +9,6 @@ export const L = {
   keyboard: { x: 0.25, z: -0.58 },
   mug: { x: 0.72, z: -0.72 },
   duck: { x: -0.16, z: -1.0 },
-  phone: { x: 0.36, z: -0.55 },
+  phone: { x: 0.58, z: -0.47 },
   window: { x: 0.95, y: 1.7, w: 1.7, h: 1.15 },
 };

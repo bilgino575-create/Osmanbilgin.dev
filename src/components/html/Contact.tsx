@@ -21,7 +21,7 @@ export default function Contact() {
   return (
     <Section id="contact">
       <div className="wrap">
-        <div className="glass grid max-w-[64rem] gap-8 p-6 sm:p-9 lg:grid-cols-[1.2fr_1fr]">
+        <div className="glass grid max-w-[40rem] gap-6 p-6 sm:p-9">
           <div>
             <p className="eyebrow mb-4">
               <b>$</b> ssh hello@osmanbilgin.dev
@@ -35,7 +35,7 @@ export default function Contact() {
             </p>
             <ContactForm />
           </div>
-          <div className="term self-end">
+          <div className="term border-t border-line pt-5">
             <p className="d"># reachable directly</p>
             <ul className="mt-2 grid gap-2">
               {links.map(({ Icon, label, value, href, external }) => (

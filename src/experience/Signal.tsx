@@ -54,12 +54,15 @@ export default function Signal() {
       z = o[2] + 3.2 - 4.6 * k + Math.sin(k * 14) * 0.5;
       scale = 0.3;
     } else if (p < 0.875) {
+      // flies down the tunnel, then orbits the globe as a packet
       const o = WORLD_OFFSET.network;
-      const k = smoothstep(0.7, 0.875, p);
-      x = o[0] + Math.sin(k * 6.3) * 2;
-      y = o[1] + Math.cos(k * 5) * 1.5 + 0.5;
-      z = o[2] + 2 - 60 * k;
-      scale = 0.9;
+      const k = smoothstep(0.7, 0.75, p);
+      const orbit = smoothstep(0.75, 0.875, p);
+      const ang = orbit * Math.PI * 2.5 + t * 0.3;
+      x = o[0] + Math.sin(k * 6.3) * 1.2 * (1 - orbit) + Math.cos(ang) * 4.6 * orbit;
+      y = o[1] + Math.cos(k * 5) * 1.0 * (1 - orbit) + Math.sin(ang * 1.3) * 1.4 * orbit;
+      z = o[2] + 20 - 74 * k - 4 * orbit + Math.sin(ang) * 4.6 * orbit;
+      scale = 1.2;
     } else {
       // returns to the phone
       const k = smoothstep(0.875, 0.92, p);

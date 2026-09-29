@@ -2,7 +2,7 @@ import { siteConfig } from "@/lib/data";
 
 export default function Footer() {
   return (
-    <footer className="relative z-[2] border-t border-line bg-bg/80 backdrop-blur-sm">
+    <footer className="site-footer border-t border-line bg-bg/80 backdrop-blur-sm">
       <div className="wrap flex flex-col gap-3 py-6 text-xs text-text-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="mono">
           © {new Date().getFullYear()} {siteConfig.name} · {siteConfig.url.replace("https://", "")}

@@ -84,6 +84,7 @@ export default function ScrollDriver() {
         lastSection = best;
         store.set({ section: best });
       }
+      html.style.setProperty("--footer-vis", sectionVisibility(SECTIONS[SECTIONS.length - 1], p).toFixed(3));
       // Pipeline stages turn green as the visitor moves through Act IV.
       const t = (p - processSection.from) / (processSection.to - processSection.from);
       const n = pipeline.length;

@@ -47,15 +47,15 @@ export const DESKTOP_KEYS: Key[] = [
   // ACT IV — the network
   { p: 0.705, world: "network", pos: [0, 0, 30], tgt: [0, 0, -40], fov: 60 },
   { p: 0.745, world: "network", pos: [0, 0, 2], tgt: [0, 0, -40], fov: 62 },
-  { p: 0.79, world: "network", pos: [-3.4, 2.2, -50.5], tgt: [0, 0.2, -58], fov: 40, stop: true },
-  { p: 0.855, world: "network", pos: [3.2, 3.0, -49.5], tgt: [0, 0.4, -58], fov: 40 },
-  { p: 0.865, world: "network", pos: [0.5, 0.5, -52], tgt: [0, 0, -58], fov: 60 },
+  { p: 0.79, world: "network", pos: [-6.2, 2.6, -47.0], tgt: [1.6, 0.1, -58], fov: 40, stop: true },
+  { p: 0.855, world: "network", pos: [7.2, 3.4, -47.5], tgt: [-1.2, 0.3, -58], fov: 40 },
+  { p: 0.865, world: "network", pos: [0.6, 0.6, -50.5], tgt: [0, 0, -58], fov: 60 },
   // ACT V — return to the desk, then out of the window
-  { p: 0.875, world: "desk", pos: [0.62, 1.05, 0.02], tgt: [0.36, 0.76, -0.55], fov: 36 },
-  { p: 0.91, world: "desk", pos: [0.55, 1.0, -0.05], tgt: [0.36, 0.76, -0.56], fov: 36, stop: true },
+  { p: 0.875, world: "desk", pos: [0.3, 1.12, 0.05], tgt: [0.58, 0.755, -0.47], fov: 36 },
+  { p: 0.91, world: "desk", pos: [0.34, 1.02, -0.05], tgt: [0.58, 0.755, -0.47], fov: 36, stop: true },
   { p: 0.955, world: "desk", pos: [-0.2, 1.35, 0.9], tgt: [0.9, 1.35, -1.6], fov: 40 },
   { p: 0.975, world: "desk", pos: [0.9, 1.6, -1.9], tgt: [0.9, 1.6, -0.9], fov: 44 },
-  { p: 1.0, world: "desk", pos: [2.4, 3.2, -9.5], tgt: [0.9, 1.8, -1.6], fov: 46, stop: true },
+  { p: 1.0, world: "desk", pos: [3.8, 4.8, -17.5], tgt: [0.9, 2.6, -1.6], fov: 46, stop: true },
 ];
 
 /** Mobile: fewer intermediate stops, camera further back so panels fit. */
@@ -74,12 +74,12 @@ export const MOBILE_KEYS: Key[] = [
   { p: 0.7, world: "silicon", pos: [-4.2, 0.6, -1.2], tgt: [-6, 0.2, -3.4], fov: 50 },
   { p: 0.705, world: "network", pos: [0, 0, 30], tgt: [0, 0, -40], fov: 70 },
   { p: 0.745, world: "network", pos: [0, 0, 2], tgt: [0, 0, -40], fov: 70 },
-  { p: 0.79, world: "network", pos: [-2.5, 3.5, -47], tgt: [0, 0, -58], fov: 50, stop: true },
-  { p: 0.865, world: "network", pos: [0.5, 1, -51], tgt: [0, 0, -58], fov: 70 },
-  { p: 0.875, world: "desk", pos: [0.6, 1.2, 0.3], tgt: [0.36, 0.76, -0.55], fov: 44 },
-  { p: 0.91, world: "desk", pos: [0.55, 1.1, 0.1], tgt: [0.36, 0.76, -0.56], fov: 44, stop: true },
+  { p: 0.79, world: "network", pos: [-3.5, 4.5, -41], tgt: [0, 0, -58], fov: 50, stop: true },
+  { p: 0.865, world: "network", pos: [0.5, 1, -50], tgt: [0, 0, -58], fov: 70 },
+  { p: 0.875, world: "desk", pos: [0.45, 1.25, 0.1], tgt: [0.58, 0.755, -0.47], fov: 44 },
+  { p: 0.91, world: "desk", pos: [0.5, 1.15, 0.0], tgt: [0.58, 0.755, -0.47], fov: 44, stop: true },
   { p: 0.975, world: "desk", pos: [0.9, 1.6, -1.9], tgt: [0.9, 1.6, -0.9], fov: 50 },
-  { p: 1.0, world: "desk", pos: [2.2, 3.4, -10.5], tgt: [0.9, 1.8, -1.6], fov: 52, stop: true },
+  { p: 1.0, world: "desk", pos: [3.0, 5.0, -16.5], tgt: [0.9, 2.8, -1.6], fov: 54, stop: true },
 ];
 
 export function worldAt(keys: Key[], p: number): WorldId {
