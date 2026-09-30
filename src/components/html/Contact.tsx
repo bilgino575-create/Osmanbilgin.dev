@@ -40,11 +40,11 @@ export default function Contact() {
             <ul className="mt-2 grid gap-2">
               {links.map(({ Icon, label, value, href, external }) => (
                 <li key={label} className="flex flex-wrap items-center gap-x-3 gap-y-0">
-                  <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-cyan" />
+                  <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-accent" />
                   <span className="d w-20 shrink-0">{label}</span>
                   <a
                     href={href}
-                    className="break-all hover:text-cyan"
+                    className="break-all hover:text-accent"
                     {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   >
                     {value}

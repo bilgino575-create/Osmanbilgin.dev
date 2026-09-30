@@ -56,7 +56,7 @@ function drawScreen(ctx: CanvasRenderingContext2D, lit: number, sent: boolean) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.font = mono(13, 500);
-  ctx.fillStyle = "#00f5ff";
+  ctx.fillStyle = "#2997ff";
   ctx.fillText(sent ? "● INCOMING · now" : "● CONTACT", 44, y + 32);
   ctx.font = display(22, 700);
   ctx.fillStyle = "#f4f4f5";
@@ -65,7 +65,7 @@ function drawScreen(ctx: CanvasRenderingContext2D, lit: number, sent: boolean) {
   ctx.fillStyle = "#c9ccd6";
   if (sent) {
     ctx.fillText("via hello@osmanbilgin.dev", 44, y + 98);
-    ctx.fillStyle = "#00ff88";
+    ctx.fillStyle = "#30d158";
     ctx.fillText("packet delivered ✓", 44, y + 126);
     ctx.fillStyle = "#8a8d99";
     ctx.fillText("your mail client has the rest", 44, y + 154);
@@ -79,7 +79,7 @@ function drawScreen(ctx: CanvasRenderingContext2D, lit: number, sent: boolean) {
   roundRect(ctx, 24, y2, W - 48, 74, 22);
   ctx.fillStyle = "rgba(255,255,255,0.06)";
   ctx.fill();
-  ctx.fillStyle = "#00ff88";
+  ctx.fillStyle = "#30d158";
   ctx.beginPath();
   ctx.arc(52, y2 + 37, 6, 0, Math.PI * 2);
   ctx.fill();

@@ -62,7 +62,7 @@ export default function NetworkWorld() {
       new ShaderMaterial({
         vertexShader: tunnelVertex,
         fragmentShader: tunnelFragment,
-        uniforms: { uTime: { value: 0 }, uCyan: { value: new Color("#00f5ff") }, uViolet: { value: new Color("#7c3aed") }, uLength: { value: TUNNEL_LEN } },
+        uniforms: { uTime: { value: 0 }, uCyan: { value: new Color("#2997ff") }, uViolet: { value: new Color("#5e5ce6") }, uLength: { value: TUNNEL_LEN } },
         side: BackSide,
       }),
     []
@@ -85,7 +85,7 @@ export default function NetworkWorld() {
       new ShaderMaterial({
         vertexShader: packetVertex,
         fragmentShader: packetFragment,
-        uniforms: { uTime: { value: 0 }, uLength: { value: TUNNEL_LEN - 6 }, uColor: { value: new Color("#00f5ff") } },
+        uniforms: { uTime: { value: 0 }, uLength: { value: TUNNEL_LEN - 6 }, uColor: { value: new Color("#2997ff") } },
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
@@ -102,7 +102,7 @@ export default function NetworkWorld() {
       new ShaderMaterial({
         vertexShader: globeVertex,
         fragmentShader: globeFragment,
-        uniforms: { uMask: { value: mask }, uTime: { value: 0 }, uCyan: { value: new Color("#00f5ff") }, uViolet: { value: new Color("#7c3aed") } },
+        uniforms: { uMask: { value: mask }, uTime: { value: 0 }, uCyan: { value: new Color("#2997ff") }, uViolet: { value: new Color("#5e5ce6") } },
       }),
     [mask]
   );
@@ -111,7 +111,7 @@ export default function NetworkWorld() {
       new ShaderMaterial({
         vertexShader: globeVertex,
         fragmentShader: atmosphereFragment,
-        uniforms: { uCyan: { value: new Color("#00f5ff") } },
+        uniforms: { uCyan: { value: new Color("#2997ff") } },
         transparent: true,
         depthWrite: false,
         side: BackSide,
@@ -259,7 +259,7 @@ export default function NetworkWorld() {
       new ShaderMaterial({
         vertexShader: traceVertex,
         fragmentShader: traceFragment,
-        uniforms: { uTime: { value: 0 }, uColor: { value: new Color("#00f5ff") }, uIntensity: { value: 1.5 } },
+        uniforms: { uTime: { value: 0 }, uColor: { value: new Color("#2997ff") }, uIntensity: { value: 1.5 } },
       }),
     []
   );
@@ -411,7 +411,7 @@ export default function NetworkWorld() {
         sd.setMatrixAt(i, tmp);
         const done = tp > (i + 1) / (n + 0.5);
         const active = !done && tp > i / (n + 0.5);
-        const target = done ? "#00ff88" : active ? "#00f5ff" : "#9aa0aa";
+        const target = done ? "#30d158" : active ? "#2997ff" : "#9aa0aa";
         stageColor[i].lerp(col.set(target), 0.1);
         colors.setXYZ(i, stageColor[i].r, stageColor[i].g, stageColor[i].b);
         sd.setColorAt(i, stageColor[i]);
@@ -449,8 +449,8 @@ export default function NetworkWorld() {
       <instancedMesh ref={stageDotRef} args={[stageDotGeo, undefined, processSteps.length]} frustumCulled={false}>
         <meshBasicMaterial toneMapped={false} color={[1.6, 1.6, 1.6]} />
       </instancedMesh>
-      <pointLight position={[0, 6, -50]} intensity={3} distance={30} decay={2} color="#00f5ff" />
-      <pointLight position={[-8, -4, -56]} intensity={2} distance={30} decay={2} color="#7c3aed" />
+      <pointLight position={[0, 6, -50]} intensity={3} distance={30} decay={2} color="#2997ff" />
+      <pointLight position={[-8, -4, -56]} intensity={2} distance={30} decay={2} color="#5e5ce6" />
     </group>
   );
 }

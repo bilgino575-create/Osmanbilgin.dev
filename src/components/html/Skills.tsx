@@ -18,7 +18,7 @@ export default function Skills() {
               <li key={s.name}>
                 <div className="mb-1.5 flex items-baseline justify-between gap-3">
                   <h3 className="text-sm font-medium">{s.name}</h3>
-                  <span className="mono num text-xs text-cyan">
+                  <span className="mono num text-xs text-accent">
                     {s.level}
                     <span className="text-muted">/100</span>
                   </span>

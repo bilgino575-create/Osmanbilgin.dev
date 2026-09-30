@@ -7,38 +7,67 @@
 export const OS = {
   W: 1536,
   H: 960,
-  TASKBAR: 36,
+  /** menu bar height (macOS-style, at the top) */
+  TASKBAR: 30,
+  /** dock height + margin reserved at the bottom */
+  DOCK: 92,
   TITLE: 32,
-  /** window canvases are rendered at this multiple of OS pixels */
+  /** window corner radius in OS pixels */
+  RADIUS: 11,
+  /** window canvases are rendered at this multiple of OS pixels (1 on phones, set before the OS is created) */
   SCALE: 2,
 };
 
+/** Older browsers (Safari < 16, Chrome < 99) have no roundRect; draw one with arcs. */
+export function polyfillCanvas() {
+  if (typeof CanvasRenderingContext2D === "undefined") return;
+  const proto = CanvasRenderingContext2D.prototype as CanvasRenderingContext2D & {
+    roundRect?: (x: number, y: number, w: number, h: number, r?: number | number[]) => void;
+  };
+  if (typeof proto.roundRect === "function") return;
+  proto.roundRect = function (x: number, y: number, w: number, h: number, r: number | number[] = 0) {
+    const rr = Array.isArray(r) ? r : [r, r, r, r];
+    const [tl, tr, br, bl] = [rr[0] ?? 0, rr[1] ?? rr[0] ?? 0, rr[2] ?? rr[0] ?? 0, rr[3] ?? rr[1] ?? rr[0] ?? 0];
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.arcTo(x + w, y, x + w, y + tr, tr);
+    this.lineTo(x + w, y + h - br);
+    this.arcTo(x + w, y + h, x + w - br, y + h, br);
+    this.lineTo(x + bl, y + h);
+    this.arcTo(x, y + h, x, y + h - bl, bl);
+    this.lineTo(x, y + tl);
+    this.arcTo(x, y, x + tl, y, tl);
+    this.closePath();
+  };
+}
+
+/** Apple system palette (dark). Keys keep their historical names so callers don't change. */
 export const C = {
-  bg: "#07070b",
-  bg2: "#0b0c12",
-  panel: "#0e0f16",
-  panel2: "#12131b",
-  line: "rgba(255,255,255,0.09)",
-  line2: "rgba(255,255,255,0.16)",
-  text: "#e8e8ec",
-  text2: "#a7a7b2",
-  muted: "#63636e",
-  cyan: "#00f5ff",
-  violet: "#a78bfa",
-  green: "#00ff88",
-  amber: "#ffb648",
-  red: "#ff5c5c",
-  keyword: "#c792ea",
-  string: "#8fe388",
-  number: "#f78c6c",
-  type: "#82aaff",
-  comment: "#5c6370",
-  punct: "#89ddff",
-  tag: "#7fdbff",
+  bg: "#1c1c1e",
+  bg2: "#1e1e20",
+  panel: "#1e1e1e",
+  panel2: "#2a2a2c",
+  line: "rgba(255,255,255,0.08)",
+  line2: "rgba(255,255,255,0.14)",
+  text: "#f5f5f7",
+  text2: "#a1a1a6",
+  muted: "#6e6e73",
+  cyan: "#64d2ff",
+  violet: "#bf5af2",
+  green: "#30d158",
+  amber: "#ffd60a",
+  red: "#ff453a",
+  keyword: "#ff7b72",
+  string: "#a5d6ff",
+  number: "#79c0ff",
+  type: "#ffa657",
+  comment: "#8b949e",
+  punct: "#c9d1d9",
+  tag: "#7ee787",
 };
 
 let monoFamily = "'Geist Mono', ui-monospace, monospace";
-let displayFamily = "'Space Grotesk', system-ui, sans-serif";
+let displayFamily = "Inter, -apple-system, system-ui, sans-serif";
 
 export function resolveFonts() {
   if (typeof document === "undefined") return;
@@ -73,7 +102,7 @@ export function roundRect(
   y: number,
   w: number,
   h: number,
-  r: number
+  r: number | number[]
 ) {
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);

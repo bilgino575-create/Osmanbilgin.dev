@@ -48,9 +48,10 @@ export class ScreenOS {
     this.cctx = this.composite.getContext("2d", { alpha: false })!;
     this.backdrop = makeCanvas(OS.W, OS.H);
     this.bctx = this.backdrop.getContext("2d", { alpha: false })!;
-    this.terminal = new Terminal({ x: 36, y: 60, w: 640, h: 520 }, host);
-    this.editor = new Editor({ x: 700, y: 60, w: 800, h: 620 });
-    this.explorer = new Explorer({ x: 36, y: 604, w: 640, h: 320 }, (slug) => host.onProject(slug));
+    // layout leaves the menu bar above and the dock below untouched
+    this.terminal = new Terminal({ x: 36, y: 52, w: 640, h: 500 }, host);
+    this.editor = new Editor({ x: 700, y: 52, w: 800, h: 816 });
+    this.explorer = new Explorer({ x: 36, y: 572, w: 640, h: 296 }, (slug) => host.onProject(slug));
     this.windows = [this.terminal, this.editor, this.explorer];
     this.setFocus(this.terminal);
     this.phaseStart = performance.now();
@@ -101,6 +102,25 @@ export class ScreenOS {
     this.compositeDirty = true;
   }
 
+  /** dock icon rects in OS pixels, in the stable app order */
+  private dockRects() {
+    const { W, H } = OS;
+    const size = 56;
+    const gap = 14;
+    const apps = [this.terminal, this.editor, this.explorer];
+    const total = apps.length * size + (apps.length - 1) * gap;
+    const x0 = (W - total) / 2;
+    const y = H - 78;
+    return apps.map((w, i) => ({ w, x: x0 + i * (size + gap), y, size }));
+  }
+
+  dockAt(x: number, y: number): OsWindow | null {
+    for (const d of this.dockRects()) {
+      if (x >= d.x && x < d.x + d.size && y >= d.y && y < d.y + d.size) return d.w;
+    }
+    return null;
+  }
+
   windowAt(x: number, y: number): OsWindow | null {
     for (let i = this.windows.length - 1; i >= 0; i--) {
       const w = this.windows[i];
@@ -114,6 +134,10 @@ export class ScreenOS {
   pointer(kind: PointerKind, x: number, y: number, deltaY = 0) {
     if (this.phase !== "desktop") return;
     const w = kind === "leave" ? null : this.windowAt(x, y);
+    if (!w && kind === "down") {
+      const d = this.dockAt(x, y);
+      if (d) this.setFocus(d);
+    }
     if (this.hoverWin && this.hoverWin !== w) {
       this.hoverWin.pointer({ kind: "leave", x: 0, y: 0 });
       this.hoverWin.hover = false;
@@ -189,7 +213,9 @@ export class ScreenOS {
 
   private clock() {
     const d = new Date();
-    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
+    const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()];
+    return `${day} ${d.getDate()} ${mon}  ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
 
   private sampleAverage() {
@@ -217,73 +243,199 @@ export class ScreenOS {
     this.backdropVersion++;
     const ctx = this.bctx;
     const { W, H, TASKBAR } = OS;
-    const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, "#07070c");
-    g.addColorStop(1, "#0b0b14");
-    ctx.fillStyle = g;
+    // wallpaper: deep navy with flowing colour fields (no image asset)
+    const base = ctx.createLinearGradient(0, 0, W, H);
+    base.addColorStop(0, "#0b1030");
+    base.addColorStop(0.55, "#161046");
+    base.addColorStop(1, "#2a0f3a");
+    ctx.fillStyle = base;
     ctx.fillRect(0, 0, W, H);
-    // soft glows
-    const r1 = ctx.createRadialGradient(W * 0.85, H * 0.9, 0, W * 0.85, H * 0.9, W * 0.55);
-    r1.addColorStop(0, "rgba(124,58,237,0.22)");
-    r1.addColorStop(1, "rgba(124,58,237,0)");
-    ctx.fillStyle = r1;
-    ctx.fillRect(0, 0, W, H);
-    const r2 = ctx.createRadialGradient(W * 0.1, H * 0.1, 0, W * 0.1, H * 0.1, W * 0.5);
-    r2.addColorStop(0, "rgba(0,245,255,0.12)");
-    r2.addColorStop(1, "rgba(0,245,255,0)");
-    ctx.fillStyle = r2;
-    ctx.fillRect(0, 0, W, H);
-    // grid
-    ctx.strokeStyle = "rgba(255,255,255,0.035)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let x = 0; x <= W; x += 48) {
-      ctx.moveTo(x + 0.5, TASKBAR);
-      ctx.lineTo(x + 0.5, H);
-    }
-    for (let y = TASKBAR; y <= H; y += 48) {
-      ctx.moveTo(0, y + 0.5);
-      ctx.lineTo(W, y + 0.5);
-    }
-    ctx.stroke();
-    // watermark
-    ctx.font = display(150, 700);
-    ctx.fillStyle = "rgba(255,255,255,0.028)";
-    ctx.textBaseline = "alphabetic";
-    ctx.fillText("ROOT ACCESS", W * 0.45, H * 0.88);
+    const blob = (x: number, y: number, r: number, c0: string, c1: string) => {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, c0);
+      g.addColorStop(1, c1);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    };
+    blob(W * 0.18, H * 0.25, W * 0.5, "rgba(41,151,255,0.55)", "rgba(41,151,255,0)");
+    blob(W * 0.82, H * 0.8, W * 0.55, "rgba(191,90,242,0.5)", "rgba(191,90,242,0)");
+    blob(W * 0.62, H * 0.15, W * 0.35, "rgba(255,122,61,0.35)", "rgba(255,122,61,0)");
+    blob(W * 0.35, H * 0.95, W * 0.4, "rgba(48,209,88,0.18)", "rgba(48,209,88,0)");
+    // a soft diagonal ribbon
+    ctx.save();
+    ctx.translate(W * 0.5, H * 0.55);
+    ctx.rotate(-0.42);
+    const rib = ctx.createLinearGradient(0, -140, 0, 140);
+    rib.addColorStop(0, "rgba(255,255,255,0)");
+    rib.addColorStop(0.5, "rgba(255,255,255,0.09)");
+    rib.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = rib;
+    ctx.fillRect(-W, -140, W * 2, 280);
+    ctx.restore();
+    // darken the top so the menu bar reads
+    const top = ctx.createLinearGradient(0, 0, 0, 160);
+    top.addColorStop(0, "rgba(0,0,0,0.35)");
+    top.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = top;
+    ctx.fillRect(0, 0, W, 160);
 
-    // taskbar
-    ctx.fillStyle = "rgba(10,10,16,0.92)";
+    // menu bar
+    ctx.fillStyle = "rgba(20,20,24,0.62)";
     ctx.fillRect(0, 0, W, TASKBAR);
-    ctx.fillStyle = C.line;
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
     ctx.fillRect(0, TASKBAR - 1, W, 1);
     ctx.textBaseline = "middle";
-    ctx.font = mono(13, 500);
-    ctx.fillStyle = C.cyan;
-    ctx.fillText("◆", 18, TASKBAR / 2 + 1);
+    ctx.textAlign = "left";
+    const focusedApp = this.focus === this.editor ? "Code" : this.focus === this.explorer ? "Files" : "Terminal";
+    // logo mark
+    roundRect(ctx, 14, 7, 16, 16, 5);
     ctx.fillStyle = C.text;
-    ctx.fillText("osbOS", 38, TASKBAR / 2 + 1);
-    let x = 120;
-    ctx.font = mono(12);
-    for (const w of [this.terminal, this.editor, this.explorer]) {
-      const label = w.id;
-      const tw = ctx.measureText(label).width + 26;
-      if (w.focused) {
-        roundRect(ctx, x - 8, 6, tw, TASKBAR - 12, 6);
-        ctx.fillStyle = "rgba(255,255,255,0.07)";
-        ctx.fill();
-      }
-      ctx.fillStyle = w.focused ? w.accent : C.text2;
-      ctx.fillText("●", x, TASKBAR / 2 + 1);
-      ctx.fillStyle = w.focused ? C.text : C.text2;
-      ctx.fillText(label, x + 14, TASKBAR / 2 + 1);
-      x += tw + 12;
+    ctx.fill();
+    ctx.font = display(9, 700);
+    ctx.fillStyle = "#1d1d1f";
+    ctx.textAlign = "center";
+    ctx.fillText("OB", 22, TASKBAR / 2 + 0.5);
+    ctx.textAlign = "left";
+    let x = 42;
+    ctx.font = display(13, 700);
+    ctx.fillStyle = C.text;
+    ctx.fillText(focusedApp, x, TASKBAR / 2 + 0.5);
+    x += ctx.measureText(focusedApp).width + 18;
+    ctx.font = display(13, 500);
+    for (const item of ["File", "Edit", "View", "Go", "Window", "Help"]) {
+      ctx.fillStyle = C.text;
+      ctx.fillText(item, x, TASKBAR / 2 + 0.5);
+      x += ctx.measureText(item).width + 18;
     }
     ctx.textAlign = "right";
-    ctx.fillStyle = C.text2;
-    ctx.fillText(`${siteConfig.handle}   ${this.clock()}`, W - 18, TASKBAR / 2 + 1);
+    ctx.fillStyle = C.text;
+    ctx.fillText(this.clock(), W - 16, TASKBAR / 2 + 0.5);
+    let rx = W - 16 - ctx.measureText(this.clock()).width - 22;
+    // status glyphs: wifi arcs, battery, online dot
+    ctx.fillStyle = C.text;
+    ctx.font = display(12, 500);
+    ctx.fillText(siteConfig.handle, rx, TASKBAR / 2 + 0.5);
+    rx -= ctx.measureText(siteConfig.handle).width + 18;
+    // battery
+    ctx.strokeStyle = "rgba(245,245,247,0.85)";
+    ctx.lineWidth = 1.2;
+    roundRect(ctx, rx - 24, TASKBAR / 2 - 5.5, 22, 11, 3);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(245,245,247,0.85)";
+    ctx.fillRect(rx - 22, TASKBAR / 2 - 3.5, 18, 7);
+    ctx.fillRect(rx - 1, TASKBAR / 2 - 2, 1.5, 4);
+    rx -= 40;
+    // wifi
+    ctx.strokeStyle = "rgba(245,245,247,0.85)";
+    ctx.lineWidth = 1.6;
+    for (let i = 1; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.arc(rx - 8, TASKBAR / 2 + 4, i * 3.4, Math.PI * 1.25, Math.PI * 1.75);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(245,245,247,0.85)";
+    ctx.beginPath();
+    ctx.arc(rx - 8, TASKBAR / 2 + 4, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+    rx -= 32;
     ctx.fillStyle = C.green;
-    ctx.fillText("● online", W - 190, TASKBAR / 2 + 1);
+    ctx.beginPath();
+    ctx.arc(rx - 4, TASKBAR / 2 + 0.5, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.textAlign = "left";
+
+    // dock
+    const dock = this.dockRects();
+    const pad = 12;
+    const dx = dock[0].x - pad;
+    const dw = dock[dock.length - 1].x + dock[0].size + pad - dx;
+    const dy = dock[0].y - pad;
+    const dh = dock[0].size + pad * 2;
+    roundRect(ctx, dx + 3, dy + 6, dw, dh, 22);
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fill();
+    roundRect(ctx, dx, dy, dw, dh, 22);
+    ctx.fillStyle = "rgba(40,40,46,0.62)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.14)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    for (const d of dock) {
+      this.drawDockIcon(ctx, d.w, d.x, d.y, d.size);
+      // running indicator
+      ctx.fillStyle = d.w.focused ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.45)";
+      ctx.beginPath();
+      ctx.arc(d.x + d.size / 2, d.y + d.size + 7, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  private drawDockIcon(ctx: CanvasRenderingContext2D, w: OsWindow, x: number, y: number, s: number) {
+    const r = s * 0.22;
+    // shadow
+    roundRect(ctx, x, y + 2, s, s, r);
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fill();
+    const g = ctx.createLinearGradient(0, y, 0, y + s);
+    if (w === this.terminal) {
+      g.addColorStop(0, "#3a3a3f");
+      g.addColorStop(1, "#151517");
+    } else if (w === this.editor) {
+      g.addColorStop(0, "#3aa0ff");
+      g.addColorStop(1, "#0a5bd8");
+    } else {
+      g.addColorStop(0, "#6fc4ff");
+      g.addColorStop(1, "#1f8bff");
+    }
+    roundRect(ctx, x, y, s, s, r);
+    ctx.fillStyle = g;
+    ctx.fill();
+    // top gloss
+    ctx.save();
+    ctx.clip();
+    const gloss = ctx.createLinearGradient(0, y, 0, y + s * 0.5);
+    gloss.addColorStop(0, "rgba(255,255,255,0.22)");
+    gloss.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gloss;
+    ctx.fillRect(x, y, s, s * 0.5);
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    if (w === this.terminal) {
+      // a mini prompt window
+      roundRect(ctx, x + 9, y + 12, s - 18, s - 24, 5);
+      ctx.fillStyle = "#0b0b0d";
+      ctx.fill();
+      ctx.fillStyle = "#e5e5ea";
+      ctx.fillRect(x + 9, y + 12, s - 18, 6);
+      ctx.font = mono(15, 700);
+      ctx.fillStyle = "#f5f5f7";
+      ctx.textAlign = "left";
+      ctx.fillText(">_", x + 14, y + s / 2 + 5);
+      ctx.textAlign = "center";
+    } else if (w === this.editor) {
+      ctx.font = mono(20, 700);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("</>", x + s / 2, y + s / 2 + 1);
+    } else {
+      // folder
+      const fx = x + 10;
+      const fy = y + 16;
+      const fw = s - 20;
+      const fh = s - 30;
+      roundRect(ctx, fx, fy, fw * 0.45, 8, [3, 3, 0, 0]);
+      ctx.fillStyle = "#e8f4ff";
+      ctx.fill();
+      roundRect(ctx, fx, fy + 5, fw, fh - 5, 4);
+      ctx.fillStyle = "#f5f9ff";
+      ctx.fill();
+      roundRect(ctx, fx, fy + 12, fw, fh - 12, 4);
+      ctx.fillStyle = "#dbeaff";
+      ctx.fill();
+    }
     ctx.textAlign = "left";
   }
 
@@ -292,14 +444,25 @@ export class ScreenOS {
     const { W, H } = OS;
     if (this.phase === "desktop") {
       ctx.drawImage(this.backdrop, 0, 0);
+      const R = OS.RADIUS;
       for (const w of this.windows) {
-        // shadow
-        ctx.fillStyle = "rgba(0,0,0,0.45)";
-        ctx.fillRect(w.rect.x + 4, w.rect.y + 8, w.rect.w, w.rect.h);
-        ctx.drawImage(w.canvas, w.rect.x, w.rect.y, w.rect.w, w.rect.h);
-        ctx.strokeStyle = w.focused ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)";
+        const { x, y, w: ww, h } = w.rect;
+        // layered soft shadow (no filter: cheap on every compositor pass)
+        const layers = w.focused ? 4 : 2;
+        for (let i = layers; i >= 1; i--) {
+          roundRect(ctx, x - i * 3, y + i * 2, ww + i * 6, h + i * 6, R + i * 3);
+          ctx.fillStyle = `rgba(0,0,0,${w.focused ? 0.12 : 0.1})`;
+          ctx.fill();
+        }
+        ctx.save();
+        roundRect(ctx, x, y, ww, h, R);
+        ctx.clip();
+        ctx.drawImage(w.canvas, x, y, ww, h);
+        ctx.restore();
+        roundRect(ctx, x + 0.5, y + 0.5, ww - 1, h - 1, R);
+        ctx.strokeStyle = w.focused ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.1)";
         ctx.lineWidth = 1;
-        ctx.strokeRect(w.rect.x + 0.5, w.rect.y + 0.5, w.rect.w - 1, w.rect.h - 1);
+        ctx.stroke();
       }
       return;
     }

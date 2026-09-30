@@ -1,6 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo } from "react";
+import { store } from "@/lib/store";
 import { createDeskMaterials } from "./materials";
 import { MaterialsCtx } from "./context";
 import Room from "./Room";
@@ -20,6 +21,8 @@ const DuckPhysics = lazy(() => import("./DuckPhysics"));
 export default function DeskWorld() {
   const materials = useMemo(() => createDeskMaterials(), []);
   useEffect(() => () => Object.values(materials).forEach((m) => m.dispose()), [materials]);
+  // phones skip the physics engine (≈2 MB of wasm to parse); the duck still wobbles on tap
+  const physics = !store.get().touch;
 
   return (
     <MaterialsCtx.Provider value={materials}>
@@ -32,9 +35,13 @@ export default function DeskWorld() {
       <Mug />
       <Phone />
       <StickyNotes />
-      <Suspense fallback={<DuckStatic />}>
-        <DuckPhysics />
-      </Suspense>
+      {physics ? (
+        <Suspense fallback={<DuckStatic />}>
+          <DuckPhysics />
+        </Suspense>
+      ) : (
+        <DuckStatic />
+      )}
       <Exterior />
     </MaterialsCtx.Provider>
   );

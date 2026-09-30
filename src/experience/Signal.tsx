@@ -86,7 +86,7 @@ export default function Signal() {
         <sphereGeometry args={[1, 16, 12]} />
         <meshBasicMaterial color={[0, 6, 6.5]} toneMapped={false} />
       </mesh>
-      <pointLight ref={light} color="#00f5ff" distance={0.7} decay={2} intensity={0} />
+      <pointLight ref={light} color="#2997ff" distance={0.7} decay={2} intensity={0} />
     </>
   );
 }

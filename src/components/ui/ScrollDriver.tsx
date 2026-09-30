@@ -5,6 +5,7 @@ import { SECTIONS, actAt, sectionVisibility, TRACK_VH } from "@/lib/acts";
 import { store } from "@/lib/store";
 import { audio } from "@/lib/audio";
 import { currentProgress, scrollToHash, setLenis } from "@/lib/scroll";
+import { probeWebGL } from "@/lib/gl";
 
 /**
  * Owns the scroll. Decides early whether the 3D layer is possible (so the
@@ -23,18 +24,10 @@ export default function ScrollDriver() {
     const reducedMotion = mqReduce.matches;
     const debug = params.has("debug");
 
-    // WebGL2 capability check, cheap and synchronous.
-    let glOk = false;
-    if (!params.has("nogl")) {
-      try {
-        const c = document.createElement("canvas");
-        const g = c.getContext("webgl2", { failIfMajorPerformanceCaveat: false });
-        glOk = !!g;
-        g?.getExtension("WEBGL_lose_context")?.loseContext();
-      } catch {
-        glOk = false;
-      }
-    }
+    // WebGL2 capability check, cheap and synchronous; software renderers get the HTML site.
+    const probe = probeWebGL();
+    const glOk = probe.ok;
+    if (!glOk) store.boot("warn", `3d: skipped — ${probe.reason}`);
 
     const tierParam = params.get("tier");
     const tierLocked = tierParam === "high" || tierParam === "low";
@@ -67,7 +60,7 @@ export default function ScrollDriver() {
 
     let lastSection = "";
     const apply = (p: number) => {
-      if (!glOk) return;
+      if (!store.get().gl) return;
       let best = "";
       let bestD = 1;
       for (const { s, el } of sections) {
@@ -97,9 +90,10 @@ export default function ScrollDriver() {
     };
 
     const onScroll = () => {
-      const p = glOk ? currentProgress() : 0;
+      const live = store.get().gl;
+      const p = live ? currentProgress() : 0;
       store.set({ progress: p, act: actAt(p) });
-      if (glOk) {
+      if (live) {
         apply(p);
         return;
       }

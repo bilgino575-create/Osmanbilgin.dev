@@ -45,7 +45,7 @@ export function createDeskMaterials() {
     metalness: 0.0,
     clearcoat: 0.08,
     clearcoatRoughness: 0.8,
-    emissive: new Color("#00f5ff"),
+    emissive: new Color("#2997ff"),
     emissiveIntensity: 1,
   });
   const rubber = new MeshPhysicalMaterial({
@@ -82,8 +82,8 @@ export function createDeskMaterials() {
   });
   const mat = new MeshStandardMaterial({ color: new Color("#0c0c10"), roughness: 0.92 });
   const led = new MeshStandardMaterial({
-    color: new Color("#00f5ff"),
-    emissive: new Color("#00f5ff"),
+    color: new Color("#2997ff"),
+    emissive: new Color("#2997ff"),
     emissiveIntensity: 1.5,
     toneMapped: false,
   });

@@ -4,6 +4,7 @@ import { PerformanceMonitor } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 import { getGPUTier } from "detect-gpu";
 import { store } from "@/lib/store";
+import { disableGl } from "@/lib/gl";
 
 /**
  * Quality tiers with hysteresis.
@@ -26,6 +27,12 @@ export default function Tiering() {
     getGPUTier({ benchmarksURL: "/benchmarks" })
       .then((r) => {
         if (cancelled) return;
+        const forced = new URLSearchParams(location.search).get("gl") === "1";
+        if (r.tier === 0 && !store.get().tierLocked && !forced) {
+          // blocklisted or benchmarked far below the floor: the HTML site is the better experience
+          disableGl(`gpu tier 0 (${r.gpu ?? "unknown"})`);
+          return;
+        }
         const mobileLike = r.isMobile || store.get().touch;
         const tier: "high" | "low" = r.tier >= 2 && !mobileLike ? "high" : r.tier >= 3 ? "high" : "low";
         store.set(store.get().tierLocked ? { gpuTier: r.tier } : { gpuTier: r.tier, tier });

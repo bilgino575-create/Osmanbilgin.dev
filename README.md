@@ -31,15 +31,21 @@ npm run lint
 npm run typecheck
 ```
 
-URL switches for testing: `?nogl` (HTML only), `?tier=high|low` (force a
-quality tier), `?debug` (devtools HUD, also `D`). Command palette: `~` or
-Ctrl/⌘+K.
+URL switches for testing: `?nogl` (HTML only), `?gl=1` (force WebGL on a
+software renderer such as SwiftShader; the probe refuses those by default),
+`?tier=high|low` (force a quality tier), `?debug` (devtools HUD, also `D`).
+Command palette: `~` or Ctrl/⌘+K.
+
+The interface follows the Apple system language (Inter, pure black, one blue
+accent, frosted glass, pill buttons); the on-screen OS has a menu bar, a dock
+and rounded windows. See `docs/ROOT-ACCESS.md` §1.
 
 ## Screenshots and checks
 
 ```bash
 npm run shoot -- --p 0,0.34 --tier high         # docs/screenshots
 node scripts/verify.mjs keyboard|overflow|memory|reduced|perf|bundle
+node scripts/leak.mjs                              # per-world GPU resource leak check
 ```
 
 `scripts/embed-sources.mjs` runs before every build and embeds the curated

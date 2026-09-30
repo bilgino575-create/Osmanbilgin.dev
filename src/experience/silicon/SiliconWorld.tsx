@@ -56,11 +56,11 @@ const BLOCK_LABEL: Record<string, string> = {
   npu: "NPU",
 };
 const BLOCK_COLOR: Record<string, string> = {
-  core: "#00f5ff",
-  cache: "#a78bfa",
-  memory: "#00ff88",
-  gpu: "#7c3aed",
-  io: "#00f5ff",
+  core: "#2997ff",
+  cache: "#bf5af2",
+  memory: "#30d158",
+  gpu: "#5e5ce6",
+  io: "#2997ff",
   npu: "#c084fc",
 };
 
@@ -150,8 +150,8 @@ export default function SiliconWorld() {
         fragmentShader: dieFragment,
         uniforms: {
           uTime: { value: 0 },
-          uCyan: { value: new Color("#00f5ff") },
-          uViolet: { value: new Color("#7c3aed") },
+          uCyan: { value: new Color("#2997ff") },
+          uViolet: { value: new Color("#5e5ce6") },
           uScale: { value: 24 },
         },
       }),
@@ -162,7 +162,7 @@ export default function SiliconWorld() {
       new ShaderMaterial({
         vertexShader: dieVertex,
         fragmentShader: boardFragment,
-        uniforms: { uTime: { value: 0 }, uCyan: { value: new Color("#00f5ff") } },
+        uniforms: { uTime: { value: 0 }, uCyan: { value: new Color("#2997ff") } },
       }),
     []
   );
@@ -213,7 +213,7 @@ export default function SiliconWorld() {
       new ShaderMaterial({
         vertexShader: traceVertex,
         fragmentShader: traceFragment,
-        uniforms: { uTime: { value: 0 }, uColor: { value: new Color("#00f5ff") }, uIntensity: { value: 1.3 } },
+        uniforms: { uTime: { value: 0 }, uColor: { value: new Color("#2997ff") }, uIntensity: { value: 1.3 } },
       }),
     []
   );
@@ -252,11 +252,14 @@ export default function SiliconWorld() {
   );
   const streamLabelMat = useMemo(() => {
     const m = labelMat.clone();
+    // ShaderMaterial.clone() deep-clones texture uniforms: point the clone back at
+    // the shared atlas so one GPU texture is uploaded (and disposed) per mount
+    m.uniforms.uMap.value = labelSets.atlas.texture;
     m.uniforms.uBillboard.value = 1;
     m.uniforms.uIntensity.value = 1.15;
     m.blending = AdditiveBlending;
     return m;
-  }, [labelMat]);
+  }, [labelMat, labelSets]);
 
   const makeLabelGeo = (count: number, pick: (i: number) => { entry: number; color: string; alpha?: number }) => {
     const g = new PlaneGeometry(1, 1);
@@ -314,7 +317,7 @@ export default function SiliconWorld() {
     const colors = new Float32Array(n * 3);
     skillLevels.forEach((s, i) => {
       level[i] = s.level / 100;
-      col.set(i % 3 === 0 ? "#00f5ff" : i % 3 === 1 ? "#a78bfa" : "#00ff88");
+      col.set(i % 3 === 0 ? "#2997ff" : i % 3 === 1 ? "#bf5af2" : "#30d158");
       colors[i * 3] = col.r;
       colors[i * 3 + 1] = col.g;
       colors[i * 3 + 2] = col.b;
@@ -541,8 +544,8 @@ export default function SiliconWorld() {
       <instancedMesh ref={gaugeLabelRef} args={[gaugeLabelGeo, labelMat, skillLevels.length]} frustumCulled={false} />
       {/* lights */}
       <directionalLight position={[4, 12, 6]} intensity={1.6} color="#c9d4ff" />
-      <pointLight position={[0, 3, 0]} intensity={4} distance={14} decay={2} color="#00f5ff" />
-      <pointLight position={[3, 1.5, -2]} intensity={2} distance={10} decay={2} color="#7c3aed" />
+      <pointLight position={[0, 3, 0]} intensity={4} distance={14} decay={2} color="#2997ff" />
+      <pointLight position={[3, 1.5, -2]} intensity={2} distance={10} decay={2} color="#5e5ce6" />
       <ambientLight intensity={0.08} />
     </group>
   );

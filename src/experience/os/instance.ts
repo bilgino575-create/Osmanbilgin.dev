@@ -1,6 +1,7 @@
 "use client";
 
 import { ScreenOS } from "./ScreenOS";
+import { OS, polyfillCanvas } from "./draw";
 import { store } from "@/lib/store";
 import { getLenis, scrollToHash } from "@/lib/scroll";
 
@@ -13,6 +14,9 @@ let os: ScreenOS | null = null;
  */
 export function getOS(): ScreenOS {
   if (os) return os;
+  polyfillCanvas();
+  // phones: half-resolution window canvases (a quarter of the texture memory)
+  OS.SCALE = store.get().touch ? 1 : 2;
   os = new ScreenOS({
     openProject(slug) {
       os!.explorer.openProject(slug);

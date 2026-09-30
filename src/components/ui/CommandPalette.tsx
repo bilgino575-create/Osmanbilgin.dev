@@ -167,7 +167,7 @@ function Palette() {
                 onClick={() => run(c)}
               >
                 <span>
-                  <span className="text-cyan">$</span> {c.label}
+                  <span className="text-accent">$</span> {c.label}
                 </span>
                 <span className="text-muted">{c.hint}</span>
               </button>

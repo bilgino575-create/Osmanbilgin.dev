@@ -27,26 +27,15 @@ export default function Nav() {
   return (
     <header className="nav">
       <div className="wrap flex items-center justify-between">
-        <a
-          href="#home"
-          onClick={(e) => go(e, "#home")}
-          className="mono flex items-center gap-3 text-[12px] tracking-[0.2em]"
-        >
-          <span
-            aria-hidden="true"
-            className="grid h-8 w-8 place-items-center rounded-md border border-line-2 bg-black/40 text-[11px] font-medium text-cyan"
-            style={{ borderColor: "var(--line-2)" }}
-          >
+        <a href="#home" onClick={(e) => go(e, "#home")} className="nav-brand">
+          <span aria-hidden="true" className="nav-mark">
             {siteConfig.initials}
           </span>
-          <span className="hidden sm:inline">{siteConfig.url.replace("https://", "")}</span>
+          <span className="hidden sm:inline">{siteConfig.name}</span>
           <span className="sr-only">, back to the top</span>
         </a>
 
-        <nav
-          className="nav-links hidden items-center gap-0.5 rounded-full border border-line bg-black/40 p-1 backdrop-blur-md lg:flex"
-          aria-label="Primary"
-        >
+        <nav className="nav-links hidden items-center gap-0.5 lg:flex" aria-label="Primary">
           {navLinks.map((l) => (
             <a
               key={l.href}
@@ -62,18 +51,18 @@ export default function Nav() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="btn hidden !h-9 !px-3 md:inline-flex"
+            className="btn hidden md:inline-flex"
             onClick={() => store.set({ paletteOpen: true })}
           >
-            <span className="kbd" aria-hidden="true">⌘K</span> run
+            <span className="kbd" aria-hidden="true">⌘K</span> Search
             <span className="sr-only"> command palette (Ctrl or ⌘ + K)</span>
           </button>
-          <a href="#contact" onClick={(e) => go(e, "#contact")} className="btn !h-9 !px-4">
+          <a href="#contact" onClick={(e) => go(e, "#contact")} className="btn btn-solid">
             Hire me
           </a>
           <button
             type="button"
-            className="btn !h-9 !w-9 !px-0 lg:hidden"
+            className="btn !w-9 !px-0 lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -90,7 +79,7 @@ export default function Nav() {
       <div
         id="mobile-menu"
         hidden={!open}
-        className="fixed inset-x-3 top-[calc(var(--nav-h)+4px)] z-50 rounded-2xl border border-line bg-[rgba(8,8,12,0.94)] p-3 backdrop-blur-xl lg:hidden"
+        className="fixed inset-x-3 top-[calc(var(--nav-h)+6px)] z-50 rounded-2xl border border-line bg-[rgba(29,29,31,0.94)] p-2 backdrop-blur-xl lg:hidden"
       >
         <nav aria-label="Primary mobile" className="grid">
           {navLinks.map((l) => (
@@ -98,7 +87,7 @@ export default function Nav() {
               key={l.href}
               href={l.href}
               onClick={(e) => go(e, l.href)}
-              className="mono rounded-lg px-3 py-3 text-sm uppercase tracking-[0.18em] text-text-2 hover:bg-white/5 hover:text-text"
+              className="rounded-xl px-4 py-3 text-[17px] font-medium tracking-[-0.01em] text-text hover:bg-white/8"
               aria-current={active === l.href ? "true" : undefined}
             >
               {l.label}

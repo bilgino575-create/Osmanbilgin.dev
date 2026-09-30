@@ -39,7 +39,7 @@ function toWorld(rect: { x: number; y: number; w: number; h: number }) {
   };
 }
 
-function makeMaterial(texture: CanvasTexture, res: Vector2, brightness: number, refl = 0.5) {
+function makeMaterial(texture: CanvasTexture, res: Vector2, brightness: number, refl = 0.5, corner = new Vector2(0, 0)) {
   return new ShaderMaterial({
     vertexShader: screenVertex,
     fragmentShader: screenFragment,
@@ -48,12 +48,35 @@ function makeMaterial(texture: CanvasTexture, res: Vector2, brightness: number, 
       uBrightness: { value: brightness },
       uOn: { value: 1 },
       uRes: { value: res },
-      uReflA: { value: new Color("#7c3aed") },
-      uReflB: { value: new Color("#00f5ff") },
+      uReflA: { value: new Color("#5e5ce6") },
+      uReflB: { value: new Color("#2997ff") },
       uRefl: { value: refl },
       uTime: { value: 0 },
+      uCorner: { value: corner },
     },
   });
+}
+
+/** A blurred rounded-rectangle sprite used as each window's drop shadow. */
+function makeShadowTexture(aspect: number) {
+  const W = 256;
+  const H = Math.max(32, Math.round(W / aspect));
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext("2d")!;
+  const m = 40;
+  ctx.shadowColor = "rgba(0,0,0,0.9)";
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = "rgba(0,0,0,0.9)";
+  ctx.beginPath();
+  ctx.roundRect(m, m, W - m * 2, H - m * 2, 10);
+  ctx.fill();
+  const t = new CanvasTexture(c);
+  t.minFilter = LinearFilter;
+  t.magFilter = LinearFilter;
+  t.generateMipmaps = false;
+  return t;
 }
 
 function makeTexture(canvas: HTMLCanvasElement) {
@@ -93,9 +116,19 @@ export default function ScreenWorld() {
   const windows = useMemo(() => [os.terminal, os.editor, os.explorer], [os]);
   const winTex = useMemo(() => windows.map((w) => makeTexture(w.canvas)), [windows]);
   const winMat = useMemo(
-    () => windows.map((w, i) => makeMaterial(winTex[i], new Vector2(w.canvas.width, w.canvas.height), 1.35)),
+    () =>
+      windows.map((w, i) =>
+        makeMaterial(
+          winTex[i],
+          new Vector2(w.canvas.width, w.canvas.height),
+          1.35,
+          0.5,
+          new Vector2(OS.RADIUS / w.rect.w, OS.RADIUS / w.rect.h)
+        )
+      ),
     [windows, winTex]
   );
+  const shadowTex = useMemo(() => windows.map((w) => makeShadowTexture(w.rect.w / w.rect.h)), [windows]);
   const winGeo = useMemo(() => windows.map((w) => new PlaneGeometry(w.rect.w * S, w.rect.h * S)), [windows]);
   const versions = useRef(windows.map(() => -1));
   const backdropVersion = useRef(-1);
@@ -106,6 +139,7 @@ export default function ScreenWorld() {
   useDisposeAll(winTex);
   useDisposeAll(winMat);
   useDisposeAll(winGeo);
+  useDisposeAll(shadowTex);
 
   useFrame((state) => {
     const on = rig.p > 0.19 && rig.p < 0.48;
@@ -162,22 +196,18 @@ export default function ScreenWorld() {
             onPointerLeave={handler(w, "leave")}
             onWheel={handler(w, "wheel")}
           >
-            {/* frame + drop shadow */}
-            <mesh position={[0, 0, -0.012]}>
-              <planeGeometry args={[r.w + 0.05, r.h + 0.05]} />
-              <meshStandardMaterial color="#111319" roughness={0.6} metalness={0.2} />
-            </mesh>
-            <mesh position={[0.06, -0.08, -0.03]}>
-              <planeGeometry args={[r.w + 0.06, r.h + 0.06]} />
-              <meshBasicMaterial color="#000000" transparent opacity={0.55} />
+            {/* soft drop shadow (the sprite has a 40/256 margin, so scale it up) */}
+            <mesh position={[0.02, -0.1, -0.03]}>
+              <planeGeometry args={[r.w * (256 / 176), r.h * (256 / 176)]} />
+              <meshBasicMaterial map={shadowTex[i]} transparent opacity={0.7} depthWrite={false} />
             </mesh>
           </mesh>
         );
       })}
       {/* light from the windows onto the floor */}
-      <pointLight position={[-2.6, 0.5, 2.5]} color="#00f5ff" intensity={1.2} distance={7} decay={2} />
-      <pointLight position={[2.2, 0.5, 2.5]} color="#a78bfa" intensity={1.2} distance={7} decay={2} />
-      <pointLight position={[-2.6, -2.2, 2.5]} color="#00ff88" intensity={0.6} distance={5} decay={2} />
+      <pointLight position={[-2.6, 0.5, 2.5]} color="#2997ff" intensity={1.2} distance={7} decay={2} />
+      <pointLight position={[2.2, 0.5, 2.5]} color="#bf5af2" intensity={1.0} distance={7} decay={2} />
+      <pointLight position={[-2.6, -2.2, 2.5]} color="#30d158" intensity={0.5} distance={5} decay={2} />
       <ClickAway camera={camera} />
     </group>
   );

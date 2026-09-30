@@ -2,7 +2,9 @@
 
 import { useDispose } from "../utils/useDispose";
 
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { audio } from "@/lib/audio";
 import { BufferGeometry, ConeGeometry, Group, SphereGeometry, Matrix4 } from "three";
 import { mergeBufferGeometries } from "three-stdlib";
 import { L } from "./layout";
@@ -79,10 +81,40 @@ export const DuckMesh = forwardRef<Group>(function DuckMesh(_, ref) {
   );
 });
 
-/** Shown until the physics chunk arrives (and if it never does). */
+/**
+ * Shown until the physics chunk arrives, and on phones instead of it. A tap
+ * still gets a reaction: a damped spring wobble, no engine required.
+ */
 export function DuckStatic() {
+  const ref = useRef<Group>(null);
+  const spring = useRef({ vx: 0, vz: 0, x: 0, z: 0, hop: 0, vy: 0 });
+  useFrame((_, dt) => {
+    const g = ref.current;
+    const s = spring.current;
+    if (!g || (Math.abs(s.vx) + Math.abs(s.vz) + Math.abs(s.vy) + Math.abs(s.x) + Math.abs(s.z) + s.hop < 1e-4)) return;
+    const k = 60;
+    const c = 6;
+    s.vx += (-k * s.x - c * s.vx) * dt;
+    s.vz += (-k * s.z - c * s.vz) * dt;
+    s.x += s.vx * dt;
+    s.z += s.vz * dt;
+    s.vy -= 9.81 * dt;
+    s.hop = Math.max(0, s.hop + s.vy * dt);
+    if (s.hop === 0 && s.vy < 0) s.vy = 0;
+    g.rotation.x = s.x;
+    g.rotation.z = s.z;
+    g.position.y = L.deskY + s.hop;
+  });
+  const poke = () => {
+    const s = spring.current;
+    s.vx += (Math.random() - 0.5) * 6;
+    s.vz += (Math.random() - 0.5) * 6;
+    s.vy = 1.1;
+    s.hop = 0.001;
+    audio.blip(520);
+  };
   return (
-    <group position={[L.duck.x, L.deskY, L.duck.z]}>
+    <group ref={ref} position={[L.duck.x, L.deskY, L.duck.z]} onPointerDown={(e) => { e.stopPropagation(); poke(); }}>
       <DuckMesh />
     </group>
   );

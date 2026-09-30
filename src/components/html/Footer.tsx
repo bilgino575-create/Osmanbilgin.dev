@@ -9,12 +9,12 @@ export default function Footer() {
         </p>
         <ul className="mono flex flex-wrap gap-x-5 gap-y-2">
           <li>
-            <a href={`mailto:${siteConfig.email}`} className="hover:text-cyan">
+            <a href={`mailto:${siteConfig.email}`} className="hover:text-accent">
               {siteConfig.email}
             </a>
           </li>
           <li>
-            <a href={siteConfig.phoneHref} className="hover:text-cyan">
+            <a href={siteConfig.phoneHref} className="hover:text-accent">
               {siteConfig.phoneDisplay}
             </a>
           </li>
@@ -23,7 +23,7 @@ export default function Footer() {
               href={siteConfig.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-cyan"
+              className="hover:text-accent"
             >
               {siteConfig.instagram}
             </a>

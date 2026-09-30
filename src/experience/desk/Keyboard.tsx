@@ -306,7 +306,7 @@ export default function Keyboard() {
       {/* LED diffuser plate under the caps */}
       <mesh position={[0, 0.0135, 0]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[15 * U, 5 * U]} />
-        <meshStandardMaterial color="#020a0b" emissive="#00f5ff" emissiveIntensity={0.1} toneMapped={false} />
+        <meshStandardMaterial color="#020a0b" emissive="#2997ff" emissiveIntensity={0.1} toneMapped={false} />
       </mesh>
       <instancedMesh ref={meshRef} args={[capGeo, material, keys.length]} castShadow receiveShadow frustumCulled={false} />
     </group>

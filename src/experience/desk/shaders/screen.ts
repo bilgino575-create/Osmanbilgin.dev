@@ -27,12 +27,18 @@ uniform vec3  uReflA;     // violet room light
 uniform vec3  uReflB;     // cyan strip
 uniform float uRefl;      // strength of the room reflection
 uniform float uTime;
+uniform vec2  uCorner;    // corner radius in uv units per axis (0 = square)
 varying vec2 vUv;
 varying vec3 vNormalW;
 varying vec3 vViewDirW;
 
 void main() {
   vec2 uv = vUv;
+  if (uCorner.x > 0.0) {
+    // signed distance to a rounded rectangle, in uv space scaled to the corner radius
+    vec2 q = (abs(uv - 0.5) - (0.5 - uCorner)) / uCorner;
+    if (max(q.x, q.y) > 0.0 && length(max(q, 0.0)) > 1.0) discard;
+  }
   vec3 tex = texture2D(uMap, uv).rgb;
   // subpixel mask when magnified
   float texelPx = 1.0 / max(fwidth(uv.x) * uRes.x, 1e-4); // screen pixels per texel

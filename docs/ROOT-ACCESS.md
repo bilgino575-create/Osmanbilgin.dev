@@ -15,18 +15,36 @@ highlights, deep blacks that are never pure black, one saturated accent.
 Nothing is cartoon or low-poly; every object has bevels, roughness variation
 and a plausible material.
 
-**Palette.** Near-black `#050507` base; surfaces `#0b0b10`, `#121218`.
-Accents are the brand colours used as *light*, never as paint:
+**Palette (Apple revision).** The second pass moved the interface to the
+Apple system language: pure black `#000000` base, surfaces `#1d1d1f`,
+one blue accent for every interaction, frosted-glass bars and pill
+buttons. The brand colours now come from the Apple dark-mode system
+palette and are still used as *light*, never as paint:
 
-| token   | hex       | role                                                   |
-|---------|-----------|--------------------------------------------------------|
-| cyan    | `#00F5FF` | the signal: LED strip, terminal cursor, packets, traces |
-| violet  | `#7C3AED` | rim light from the city, die iridescence, hover states  |
-| green   | `#00FF88` | success only: passing pipeline stages, "available"      |
+| token   | hex       | role                                                        |
+|---------|-----------|-------------------------------------------------------------|
+| accent  | `#2997FF` | buttons, links, focus ring, LED strip, packets, traces        |
+| cyan    | `#64D2FF` | terminal prompt and cursor, die core                           |
+| violet  | `#BF5AF2` | rim light from the city, die cache, editor accent              |
+| indigo  | `#5E5CE6` | window tint, GPU block                                         |
+| green   | `#30D158` | success only: passing pipeline stages, "available", files      |
 
-Text: `#F4F4F5` primary, `#A1A1AA` secondary, `#63636B` muted. Text sits on
-glass panels (`rgba(8,8,12,0.55)` + 12 px blur + 1 px `rgba(255,255,255,.08)`
-border) so it stays legible over any frame of the 3D scene.
+Text: `#F5F5F7` primary, `#A1A1A6` secondary, `#86868B` muted. Text sits on
+glass panels (`rgba(29,29,31,0.66)` + 20 px blur + 180 % saturation + 1 px
+`rgba(255,255,255,.08)` border) so it stays legible over any frame of the
+3D scene. The nav is a 52 px frosted bar with a rounded "OB" mark; buttons
+are 46 px pills (`#0071E3` solid for the primary action); cards use 18 px
+radii; the command palette is a Spotlight-style sheet.
+
+**The OS on screen** follows the same language: a 30 px translucent menu
+bar (app name, File/Edit/View/Go/Window/Help, wifi, battery, clock), a
+glass dock with three icons (Terminal, Code, Files) that focus their
+windows when clicked, 11 px rounded window corners with layered soft
+shadows, unified `#2c2c2e` title bars with traffic lights, and a
+procedurally painted Sequoia-style wallpaper (four colour fields and a
+diagonal ribbon, no image asset). In Act II the window panes discard their
+corners in the shader and float over a blurred rounded-rectangle shadow
+sprite.
 
 **Lighting.** Physically-based, ACES filmic tone mapping, exposure 1.05.
 Three lights per act, never more:
@@ -43,10 +61,12 @@ transmission only on HIGH tier; LOW tier swaps to a tinted reflective
 material. Custom shaders: rain-on-glass, city bokeh, steam, screen glass,
 iridescent die, trace pulses, heat haze, fiber tunnel, globe dots, sky.
 
-**Typography.** Space Grotesk (display and body) and Geist Mono (terminal,
-labels, HUD). Both self-hosted through `next/font/google`. Type is set
-small and precise: mono labels at 11–12 px with 0.2 em tracking, display
-headings at clamp(2.5rem, 6vw, 5.5rem) with tight leading.
+**Typography.** Inter 400–700 (display and body, `-0.028 em` tracking on
+headings as in Apple marketing pages) and Geist Mono (terminal, eyebrow
+labels, HUD). Both self-hosted through `next/font/google`. Eyebrows are
+12 px mono in sentence case (the shell-prompt conceit: `cat ~/about.md`),
+display headings at clamp(3rem, 8vw, 6.75rem) for the hero and
+clamp(2.25rem, 5vw, 4rem) for sections.
 
 ## 2. Storyboard and camera path
 
@@ -156,6 +176,11 @@ locked for 6 s. The tier never oscillates more than once per minute.
 | HIGH | min(2, dev)| bloom, chromatic aberration, grain, vignette, DoF, heat haze | 2 000 streaks | 600 quads        | 1 soft  |
 | LOW  | 1          | none                                                  | 400 streaks   | 150 quads        | none    |
 
+Worlds are mounted on demand (`mountedWorlds(p)` in `Scene.tsx`: the desk
+always; screen for p 0.12–0.56; silicon 0.38–0.78; network 0.60–0.90) and
+pre-compiled with `gl.compile` in a 0 ms timeout the frame they mount, so a
+phone never holds four worlds' geometry and textures at once.
+
 Rendering rules: every repeated mesh is an `InstancedMesh`; `useFrame`
 callbacks allocate nothing (all vectors are module-level scratch objects);
 every geometry, material and texture created in a component is disposed on
@@ -193,8 +218,13 @@ worked. It does not, so the build stays on WebGL2.
 | condition                    | behaviour                                                                 |
 |------------------------------|---------------------------------------------------------------------------|
 | no WebGL2 context            | 3D chunk never loads; `html` lacks `.gl`; full designed HTML site           |
+| software renderer (SwiftShader, llvmpipe, VirtualBox…) or `failIfMajorPerformanceCaveat` | probe in `src/lib/gl.ts` refuses; HTML site; `?gl=1` forces it on (used by the measurement scripts) |
+| `detect-gpu` tier 0          | `Tiering` disables the experience before any world mounts (unless `?gl=1`) |
+| render error at runtime      | `GlBoundary` (`componentDidCatch`) and a window `error` listener for three/fiber/postprocessing/rapier chunks call `disableGl`: canvas unmounted, `html.gl` removed, panels reset, scroll to top, HTML site continues |
+| no frame for 25 s after mount, or a stall > 12 s while visible | watchdog in `ExperienceLoader` calls `disableGl` (frame clock in `StatsWriter`); off under `?gl=1` |
+| touch device                 | frame loop capped at 30 fps (`frameloop="demand"` + a 30 Hz `invalidate` loop), OS canvases at 1× instead of 2×, no rapier (spring-wobble duck), cheaper rain shader (`uQuality 0`), only the current and next world mounted |
 | `prefers-reduced-motion`     | camera cuts + crossfades; no rain animation; no auto-typing                  |
-| touch device                 | shorter track, no hover-only info, no custom cursor, larger hit targets      |
+| touch device (interaction)   | shorter track, no hover-only info, no custom cursor, larger hit targets      |
 | WebGL context lost           | overlay message, HTML remains complete                                      |
 | keyboard only                | every control focusable, visible cyan focus ring, skip link to `#about`      |
 | screen reader                | canvas `aria-hidden`; all content in semantic HTML with headings and lists   |
@@ -262,27 +292,41 @@ machine; a mid-range laptop GPU has not been measured in this session.
 
 ### Lighthouse 13 (headless Chromium + SwiftShader, `next start`, localhost)
 
-| form factor | Performance | Accessibility | Best Practices | SEO | FCP | LCP | CLS | TBT |
-|---|---|---|---|---|---|---|---|---|
-| mobile (simulated 4G, 4× CPU) | 57 | 100 | 100 | 100 | 1.21 s | 3.72 s | 0.035 | 10 783 ms |
-| desktop | 67 | 100 | 100 | 100 | 0.29 s | 0.85 s | 0.006 | 2 244 ms |
+Two runs, because the site now has two honest modes. Without `?gl=1` the
+WebGL probe refuses the software renderer, which is exactly what a visitor
+on a VM, a remote desktop or a machine with GPU acceleration off gets: the
+complete HTML site.
 
-The LCP element on both forms is the hero paragraph (`p.lede`), HTML text.
-CLS is inside the 0.05 target. TBT and the performance score are governed by
-the software rasteriser: the 3D chunk's first frames are rendered on the CPU
-here, which is where the blocking time comes from. Mobile LCP is above the
-2.5 s target on the simulated 4G profile; the delay is the render of the
-text block after fonts and CSS arrive, not the 3D chunk (which loads from an
-idle callback after first paint).
+| mode | form factor | Performance | Accessibility | Best Practices | SEO | FCP | LCP | CLS | TBT |
+|---|---|---|---|---|---|---|---|---|---|
+| HTML (probe refused SwiftShader) | mobile (simulated 4G, 4× CPU) | 64 | 100 | 100 | 100 | 1.24 s | 3.24 s | 0 | 2 459 ms |
+| HTML (probe refused SwiftShader) | desktop | 76 | 100 | 100 | 100 | 0.32 s | 0.68 s | 0 | 575 ms |
+| WebGL forced (`?gl=1`), first pass | mobile | 57 | 100 | 100 | 100 | 1.21 s | 3.72 s | 0.035 | 10 783 ms |
+| WebGL forced (`?gl=1`), first pass | desktop | 67 | 100 | 100 | 100 | 0.29 s | 0.85 s | 0.006 | 2 244 ms |
+| WebGL forced (`?gl=1`), second pass, run errored (partial) | mobile | 49 | 100 | 100 | 100 | 1.40 s | 3.85 s | 0.031 | 138 193 ms |
+| WebGL forced (`?gl=1`), second pass, run errored (partial) | desktop | 59 | 100 | 0 | 100 | 0.32 s | 0.84 s | 0.005 | 38 714 ms |
+
+The second-pass `?gl=1` runs both hit DevTools protocol timeouts
+("Network.getResponseBody", "Target closed") while SwiftShader rasterised
+the desk; the JSON files they left behind are listed as partial and are not
+comparable with the first pass: TBT is summed over a trace that the
+timeouts stretched, and the desktop Best Practices 0 is the
+errors-in-console audit catching the protocol failure itself. What holds
+across every run: Accessibility and SEO 100, CLS inside the 0.05 target,
+the LCP element is HTML text. Mobile LCP is above the 2.5 s target on the
+simulated 4G profile; the delay is the render of the hero text block after
+fonts and CSS arrive, not the 3D chunk (which loads from an idle callback
+after first paint). A Lighthouse run with a real GPU is still the missing
+measurement.
 
 ### Bundles (gzip)
 
 | bundle | size |
 |---|---|
-| initial JS before the 3D chunk (8 scripts referenced by the HTML) | 195.6 KB (budget 200 KB) |
+| initial JS before the 3D chunk (8 scripts referenced by the HTML) | 196.3 KB (budget 200 KB) |
 | 3D chunk (three, fiber, drei, postprocessing, worlds, OS) | 810.8 KB |
-| rapier physics chunk (loaded lazily, after the desk renders) | 238.4 KB |
-| other lazy chunks (lenis, palette, HUD) | 181 KB + small |
+| rapier physics chunk (loaded lazily, desktop only, after the desk renders) | 238.6 KB |
+| other lazy chunks (lenis, palette, HUD) | 183 KB + small |
 
 ### Frame time per act (`node scripts/verify.mjs perf`)
 
@@ -292,16 +336,16 @@ calls and triangles are exact and hardware-independent.
 
 | viewport | CPU throttle | act | draw calls | triangles | frame time (SwiftShader) |
 |---|---|---|---|---|---|
-| 1440×900 | 1× | I desk | 88 | 57 242 | 1 453 ms (0.2 fps) |
-| 1440×900 | 1× | II screen | 42 | 180 | 2 303 ms (0.2 fps) |
-| 1440×900 | 1× | III silicon | 43 | 11 178 | 2 476 ms (0.3 fps) |
-| 1440×900 | 1× | IV network | 42 | 10 826 | 2 118 ms |
-| 1440×900 | 1× | V return | 74 | 52 524 | 2 626 ms (0.4 fps) |
-| 390×844 | 4× | I desk | 86 | 57 218 | 690 ms (1.3 fps) |
-| 390×844 | 4× | II screen | 36 | 168 | 663 ms (1.7 fps) |
-| 390×844 | 4× | III silicon | 43 | 11 178 | 596 ms (1.9 fps) |
-| 390×844 | 4× | IV network | 40 | 27 000 | 416 ms (3.0 fps) |
-| 390×844 | 4× | V return | 68 | 51 320 | 698 ms (1.0 fps) |
+| 1440×900 | 1× | I desk | 88 | 57 242 | 1 451 ms (0.4 fps) |
+| 1440×900 | 1× | II screen | 39 | 174 | 1 688 ms (0.6 fps) |
+| 1440×900 | 1× | III silicon | 43 | 11 178 | 1 757 ms (0.6 fps) |
+| 1440×900 | 1× | IV network | 40 | 27 000 | 2 086 ms (0.5 fps) |
+| 1440×900 | 1× | V return | 74 | 52 524 | 2 246 ms (0.3 fps) |
+| 390×844 | 4× | I desk | 86 | 57 218 | 831 ms (1.0 fps) |
+| 390×844 | 4× | II screen | 36 | 168 | 799 ms (1.3 fps) |
+| 390×844 | 4× | III silicon | 43 | 11 178 | 864 ms (1.6 fps) |
+| 390×844 | 4× | IV network | 40 | 27 000 | 724 ms (1.1 fps) |
+| 390×844 | 4× | V return | 68 | 51 320 | 922 ms (2.6 fps) |
 
 The 60 fps (laptop) and 40 fps (Android) targets could not be measured in
 this container: there is no GPU. What the numbers above do show is the
@@ -312,18 +356,24 @@ triangles on HIGH, with post-processing adding a fixed ~9 full-screen passes.
 
 | point | geometries | textures | shader programs |
 |---|---|---|---|
-| before | 59 | 45 | 66 |
-| after cycle 1 | 117 | 52 | 105 |
-| after cycle 2 | 126 | 52 | 107 |
-| after cycle 3 | 126 | 52 | 107 |
-| after cycle 4 | 126 | 52 | 108 |
-| after cycle 5 | 126 | 52 | 109 |
+| before (desk only) | 59 | 45 | 50 |
+| after cycle 1 | 91 | 46 | 100 |
+| after cycle 2 | 100 | 53 | 119 |
+| after cycle 3 | 100 | 53 | 134 |
+| after cycle 4 | 100 | 53 | 134 |
+| after cycle 5 | 91 | 46 | 130 |
 
-Geometries and textures are flat from cycle 2 on (all four worlds resident).
-The program count creeps by one or two per cycle because three compiles a
-new variant when the set of lights in the frame changes; the cache keeps and
-reuses them, so this plateaus rather than leaks. JS heap after the run:
-25 MB.
+Worlds now mount on demand, so the counts move with which worlds are
+resident when the snapshot lands (desk + screen = 91/46; plus silicon =
+100/53, the unmount check runs 200 ms after the software renderer's
+1–2 s frame). They return to the same values, which is the point: nothing
+accumulates. Before the fix in §12 textures rose by two per cycle. Program
+count plateaus (three compiles a variant when the set of lights in the frame
+changes and caches it). JS heap after the run: 30 MB.
+
+Per-world check (`node scripts/leak.mjs`, three mount/unmount toggles each):
+screen 45 ↔ 52 textures, silicon 52 ↔ 53, network 46 ↔ 48, geometries and
+textures identical on every return.
 
 ### Tests
 
@@ -334,7 +384,7 @@ reuses them, so this plateaus rather than leaks. JS heap after the run:
 | keyboard only (Tab × 70) | 69 focus stops, all visible on screen, all with a focus ring, sections home→end reached in order, hidden sections scroll into view on focus |
 | 390 px, no horizontal scroll | `scrollWidth` 390 in 3D mode and in HTML mode at every act |
 | memory after 5 scroll cycles | see table above |
-| screenshots | `docs/screenshots/final-desktop-p*.png`, `final-mobile-p*.png`, `nogl-*.png` |
+| screenshots | `docs/screenshots/apple-desktop-p*.png`, `apple-mobile-p*.png` (Apple pass, current), `apple-low-*.png` (LOW tier), `final-*.png` (first pass), `nogl-*.png` |
 
 
 ## 11. Known limitations (honest)
@@ -343,6 +393,17 @@ reuses them, so this plateaus rather than leaks. JS heap after the run:
   is SwiftShader, which renders this scene at well under 1 fps. The 60/40 fps
   targets are engineered for (instancing, tiers, dpr caps, world culling)
   but not verified on a laptop or a phone.
+- **The mobile freeze report could not be reproduced here** (no phone, no
+  GPU). The second pass attacks the plausible causes instead of a measured
+  one: memory (only two worlds mounted at a time, 1× OS canvases, no rapier
+  wasm on touch), GPU time (30 fps cap, cheaper rain shader, low tier by
+  default on mobile) and the failure mode itself (probe, error boundary and
+  watchdog hand the visitor the HTML site instead of a frozen tab). Whether
+  a specific phone now holds 40 fps has to be checked on that phone with
+  `?debug`.
+- **"Does not open on some PCs"** most likely meant machines whose browser
+  falls back to a software renderer or has WebGL disabled. Those now get
+  the HTML site by design; `?gl=1` overrides the probe for testing.
 - **Lighthouse numbers come from the software renderer.** Total Blocking
   Time is dominated by the CPU rasterising WebGL; a device with a GPU will
   see a very different TBT. Accessibility, best practices and SEO scores do
@@ -359,3 +420,53 @@ reuses them, so this plateaus rather than leaks. JS heap after the run:
   static duck is shown.
 - **Initial JS** is 195 KB gzip, inside the 200 KB budget but with little
   margin; the largest slice is the Next/React runtime.
+
+## 12. Second pass: "freezes on mobile, does not open on some PCs, make it Apple"
+
+Three complaints, handled in one pass. What was actually found:
+
+- **The LOW quality tier rendered nothing.** `StatsWriter` subscribed to
+  `useFrame` with priority 1000. A positive priority tells react-three-fiber
+  that something else will call `gl.render`; on HIGH the post-processing
+  composer did, on LOW nobody did, so every machine that `detect-gpu` put
+  in tier 1–2 (most phones, integrated laptop GPUs, anything on the
+  benchmark's lower half) got a black canvas behind the HTML. Confirmed
+  with `?tier=low` on the software renderer: 0 draw calls, 0 triangles,
+  15 geometries; after the fix 41 calls / 29 k triangles / 56 geometries.
+  The priority is now negative. This is the most likely cause of "does not
+  open on every PC".
+- **Software renderers are refused.** VMs, remote desktops and machines with
+  GPU acceleration disabled report a WebGL2 context that renders at a frame
+  per second. `probeWebGL()` (`src/lib/gl.ts`) now asks for a context with
+  `failIfMajorPerformanceCaveat` and rejects a renderer string matching
+  SwiftShader / llvmpipe / VMware / VirtualBox; those visitors get the HTML
+  site. `?gl=1` overrides (the measurement scripts use it).
+- **Failure is contained.** A class error boundary around the canvas, a
+  `window.error` listener for the 3D chunks and a watchdog (no frame 25 s
+  after mount, or a 12 s stall while visible) all call `disableGl`, which
+  unmounts the canvas and hands the visitor the HTML site in place.
+- **Mobile budget.** Worlds mount on demand (two at a time) and pre-compile
+  while invisible; the render loop is capped at 30 fps on touch through
+  `frameloop="demand"` + an `invalidate` loop (the first attempt used
+  `frameloop="never"` + `advance`, which makes R3F write the raw
+  millisecond timestamp into `clock.elapsedTime` and breaks every
+  time-based shader; documented so nobody repeats it); OS canvases render
+  at 1× instead of 2× on touch (four 2 MP canvases → four 0.5 MP); rapier
+  is never loaded on touch (the duck gets a damped-spring wobble instead);
+  the rain shader has a cheap path (`uQuality 0`) without the drop field
+  and finite-difference normals.
+- **Apple theme.** See §1. Inter, black, one blue accent, frosted glass, pill
+  buttons, Spotlight-style palette; the on-screen OS got a menu bar, a dock
+  and rounded windows; the 3D palette moved from neon cyan/violet to the
+  Apple system blue/indigo/purple/green.
+- **A texture leak surfaced by on-demand mounting.** With worlds unmounting,
+  the five-cycle memory check grew by two textures per cycle. `scripts/leak.mjs`
+  toggles one world at a time: the silicon act leaked one texture per mount.
+  `ShaderMaterial.clone()` deep-clones texture uniforms, so the billboard
+  label material cloned from the flat one carried its own copy of the 1024²
+  label atlas: a second 4 MB upload per mount that nothing disposed. The
+  clone now points back at the shared atlas.
+- **Screenshot tooling.** A world mount check every 15 frames took 30 s on
+  the software renderer, so screenshots of Acts III–IV came out black
+  until the check became time-based (200 ms). The measurement scripts pass
+  `?gl=1`, and the watchdog stands down under that flag.

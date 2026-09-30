@@ -70,7 +70,9 @@ page.on("console", (m) => {
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 
 const q = [];
+// the WebGL probe rejects software renderers (SwiftShader); force it on for measurement
 if (has("nogl")) q.push("nogl");
+else q.push("gl=1");
 if (has("tier")) q.push(`tier=${get("tier", "high")}`);
 if (has("debug")) q.push("debug");
 const target = q.length ? `${url}?${q.join("&")}` : url;
@@ -100,7 +102,8 @@ for (const p of ps) {
       if (ok) break;
       await new Promise((r) => setTimeout(r, 500));
     }
-    await new Promise((r) => setTimeout(r, 1500));
+    // give a freshly mounted world time to compile and upload its textures
+    await new Promise((r) => setTimeout(r, Number(get("settle", 4000))));
   }
   const file = path.join(out, `${tag}-${mobile ? "mobile" : "desktop"}-p${p.toFixed(2)}.png`);
   await page.screenshot({ path: file });

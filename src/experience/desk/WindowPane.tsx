@@ -22,8 +22,9 @@ export default function WindowPane() {
           uAspect: { value: w.w / w.h },
           uRain: { value: 0.75 },
           uLit: { value: 1 },
-          uTintA: { value: new Color("#7c3aed") },
-          uTintB: { value: new Color("#00f5ff") },
+          uQuality: { value: 1 },
+          uTintA: { value: new Color("#5e5ce6") },
+          uTintB: { value: new Color("#2997ff") },
         },
         side: DoubleSide,
         transparent: true,
@@ -38,6 +39,7 @@ export default function WindowPane() {
     // reduced motion: rain stands still (a photo, not a film)
     if (!s.reducedMotion) material.uniforms.uTime.value = state.clock.elapsedTime;
     material.uniforms.uRain.value = s.tier === "high" ? 0.8 : 0.55;
+    material.uniforms.uQuality.value = s.touch || s.tier !== "high" ? 0 : 1;
   });
 
   return (

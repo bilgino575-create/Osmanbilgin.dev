@@ -31,7 +31,7 @@ if (mode === "keyboard") {
   const b = await launch();
   const p = await b.newPage();
   await p.setViewport({ width: 1440, height: 900 });
-  await p.goto(`${url}/?tier=low`, { waitUntil: "domcontentloaded" });
+  await p.goto(`${url}/?gl=1&tier=low`, { waitUntil: "domcontentloaded" });
   await sleep(9000);
   const seen = [];
   let hiddenFocus = 0;
@@ -78,7 +78,7 @@ if (mode === "keyboard") {
 if (mode === "overflow") {
   const b = await launch();
   const out = [];
-  for (const q of ["", "?nogl"]) {
+  for (const q of ["?gl=1", "?nogl"]) {
     const p = await b.newPage();
     await p.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
     await p.goto(`${url}/${q}`, { waitUntil: "domcontentloaded" });
@@ -106,7 +106,7 @@ if (mode === "memory") {
   const b = await launch();
   const p = await b.newPage();
   await p.setViewport({ width: 1000, height: 600 });
-  await p.goto(`${url}/?tier=high`, { waitUntil: "domcontentloaded" });
+  await p.goto(`${url}/?gl=1&tier=high`, { waitUntil: "domcontentloaded" });
   await sleep(12000);
   const stops = [0, 0.1, 0.25, 0.34, 0.42, 0.49, 0.55, 0.645, 0.72, 0.79, 0.855, 0.91, 0.975, 1.0];
   const snapshot = async () => p.evaluate(() => window.__stats?.());
@@ -143,7 +143,7 @@ if (mode === "reduced") {
   const p = await b.newPage();
   await p.setViewport({ width: 1000, height: 600 });
   await p.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-  await p.goto(`${url}/?tier=low`, { waitUntil: "domcontentloaded" });
+  await p.goto(`${url}/?gl=1&tier=low`, { waitUntil: "domcontentloaded" });
   await sleep(10000);
   const samples = [];
   for (const target of [0.05, 0.27, 0.6, 0.8, 0.93]) {
@@ -171,7 +171,7 @@ if (mode === "perf") {
     await p.setViewport({ width: w, height: h, isMobile: w < 600, hasTouch: w < 600 });
     const cdp = await p.createCDPSession();
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: throttle });
-    await p.goto(`${url}/?tier=high&debug`, { waitUntil: "domcontentloaded" });
+    await p.goto(`${url}/?gl=1&tier=high&debug`, { waitUntil: "domcontentloaded" });
     await sleep(12000);
     for (const [act, pp] of [["desk", 0.02], ["screen", 0.34], ["silicon", 0.55], ["network", 0.79], ["return", 0.91]]) {
       await p.evaluate((pp) => window.__snap?.(pp), pp);

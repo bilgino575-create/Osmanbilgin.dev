@@ -12,7 +12,7 @@ export default function Ending() {
           <span className="inline-flex items-center gap-4">
             <span
               aria-hidden="true"
-              className="inline-block h-3 w-3 rounded-full bg-green shadow-[0_0_18px_var(--green)]"
+              className="inline-block h-3 w-3 rounded-full bg-green shadow-[0_0_14px_rgba(48,209,88,0.6)]"
             />
             {siteConfig.availability}
           </span>
@@ -24,7 +24,7 @@ export default function Ending() {
           <a className="btn btn-solid" href={`mailto:${siteConfig.email}`}>
             {siteConfig.email}
           </a>
-          <a className="btn" href="#home">
+          <a className="link" href="#home">
             Back to the desk
           </a>
         </div>

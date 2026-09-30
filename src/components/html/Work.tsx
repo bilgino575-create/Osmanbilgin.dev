@@ -21,7 +21,7 @@ export default function Work() {
                   <b>▸</b> {p.slug}/
                 </p>
                 <h3 className="mt-1.5 text-base font-medium leading-tight">{p.title}</h3>
-                <p className="mono mt-1 text-[11px] uppercase tracking-[0.16em] text-muted">
+                <p className="mono mt-1 text-xs text-muted">
                   {p.category}
                 </p>
                 <p className="mt-2 flex-1 text-[13px] leading-relaxed text-text-2">

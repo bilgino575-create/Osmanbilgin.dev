@@ -54,7 +54,7 @@ export class Terminal extends OsWindow {
   private typed = false;
 
   constructor(rect: Rect, private host: TerminalHost) {
-    super("terminal", "osman@bilgin: ~", rect, C.cyan);
+    super("terminal", "osman@bilgin — -zsh — 80×24", rect, C.cyan);
     this.motd();
   }
 

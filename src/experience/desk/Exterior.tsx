@@ -5,6 +5,7 @@ import { useDispose } from "../utils/useDispose";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import {
+  CanvasTexture,
   AdditiveBlending,
   Color,
   Group,
@@ -13,6 +14,7 @@ import {
   Matrix4,
   MeshBasicMaterial,
   PlaneGeometry,
+  SRGBColorSpace,
   ShaderMaterial,
 } from "three";
 import { L } from "./layout";
@@ -40,8 +42,36 @@ export default function Exterior() {
     g.rotateY(Math.PI); // faces -z: seen from the street
     return g;
   }, []);
+  // a lit window is not a flat rectangle: a soft falloff towards the frame plus a
+  // faint mullion, so it reads as a room with or without bloom (LOW tier has none)
+  const winTex = useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 64;
+    c.height = 48;
+    const ctx = c.getContext("2d")!;
+    const g = ctx.createRadialGradient(32, 26, 4, 32, 24, 40);
+    g.addColorStop(0, "#ffffff");
+    g.addColorStop(0.55, "#cfcfcf");
+    g.addColorStop(1, "#5a5a5a");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 64, 48);
+    // curtain-ish vertical shading and a mullion
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(0, 0, 10, 48);
+    ctx.fillRect(54, 0, 10, 48);
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(31, 0, 2, 48);
+    ctx.fillRect(0, 23, 64, 2);
+    // frame
+    ctx.strokeStyle = "rgba(0,0,0,0.75)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(1.5, 1.5, 61, 45);
+    const t = new CanvasTexture(c);
+    t.colorSpace = SRGBColorSpace;
+    return t;
+  }, []);
   // instance colour is the window's light: dark glass or a lit room (HDR so it blooms)
-  const winMat = useMemo(() => new MeshBasicMaterial({ color: "#ffffff", toneMapped: false }), []);
+  const winMat = useMemo(() => new MeshBasicMaterial({ color: "#ffffff", map: winTex, toneMapped: false }), [winTex]);
   // rain streaks
   const RAIN = 900;
   const rainGeo = useMemo(() => {
@@ -95,13 +125,15 @@ export default function Exterior() {
           uAspect: { value: 3 },
           uRain: { value: 0 },
           uLit: { value: 0 },
-          uTintA: { value: new Color("#7c3aed") },
-          uTintB: { value: new Color("#00f5ff") },
+          uQuality: { value: 0 },
+          uTintA: { value: new Color("#5e5ce6") },
+          uTintB: { value: new Color("#2997ff") },
         },
       }),
     []
   );
   useDispose(winGeo);
+  useDispose(winTex);
   useDispose(winMat);
   useDispose(rainGeo);
   useDispose(rainMat);
@@ -128,7 +160,7 @@ export default function Exterior() {
         }
         const lit = !ours && r() < 0.22;
         if (lit) {
-          litColor.set(r() < 0.6 ? "#ffd9a0" : "#8ec8ff").multiplyScalar(0.9 + r() * 0.9);
+          litColor.set(r() < 0.6 ? "#ffd9a0" : "#8ec8ff").multiplyScalar(1.1 + r() * 1.0);
         } else {
           litColor.set("#06070c");
         }
@@ -213,8 +245,8 @@ export default function Exterior() {
       </mesh>
       <instancedMesh ref={rain} args={[rainGeo, rainMat, RAIN]} frustumCulled={false} />
       {/* street glow */}
-      <pointLight position={[3, -2, L.wallZ - 6]} color="#7c3aed" intensity={4} distance={20} decay={2} />
-      <pointLight position={[-4, 0, L.wallZ - 5]} color="#00f5ff" intensity={2} distance={16} decay={2} />
+      <pointLight position={[3, -2, L.wallZ - 6]} color="#5e5ce6" intensity={4} distance={20} decay={2} />
+      <pointLight position={[-4, 0, L.wallZ - 5]} color="#2997ff" intensity={2} distance={16} decay={2} />
     </group>
   );
 }

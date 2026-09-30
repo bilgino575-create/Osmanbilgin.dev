@@ -50,7 +50,7 @@ export default function DebugHud() {
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    ctx.strokeStyle = stats.ms > 20 ? "#ffb648" : "#00f5ff";
+    ctx.strokeStyle = stats.ms > 20 ? "#ffb648" : "#2997ff";
     ctx.lineWidth = 1.2;
     ctx.stroke();
   }, [debug, stats]);
@@ -90,7 +90,7 @@ export default function DebugHud() {
         <dt>gpu tier (detect-gpu)</dt>
         <dd>{gpuTier < 0 ? "…" : gpuTier}</dd>
         <dt>quality tier</dt>
-        <dd className={tier === "high" ? "text-cyan" : "text-[#ffb648]"}>{tier}</dd>
+        <dd className={tier === "high" ? "text-accent" : "text-[#ffb648]"}>{tier}</dd>
         <dt>act</dt>
         <dd>{act}</dd>
         <dt>scroll progress</dt>

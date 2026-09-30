@@ -22,6 +22,7 @@ uniform float uTime;
 uniform float uAspect;   // width / height of the pane
 uniform float uRain;     // 0..1 amount of rain
 uniform float uLit;      // how bright the room is (for the back face)
+uniform float uQuality;  // 1 = full, 0 = phone
 uniform vec3  uTintA;    // violet
 uniform vec3  uTintB;    // cyan
 varying vec2 vUv;
@@ -150,13 +151,21 @@ void main() {
   float l1 = S(0.25, 0.75, rain);
   float l2 = S(0.0, 0.5, rain);
   vec2 duv = auv * 2.6;
-  vec2 c = drops(duv, t, l0, l1, l2);
+  vec2 c;
   vec3 m1 = dropLayer(duv, t) * l1;
-  // normal from the drop field
-  vec2 e = vec2(0.002, 0.0);
-  float cx = drops(duv + e, t, l0, l1, l2).x;
-  float cy = drops(duv + e.yx, t, l0, l1, l2).x;
-  vec2 n = vec2(cx - c.x, cy - c.x);
+  vec2 n;
+  if (uQuality > 0.5) {
+    c = drops(duv, t, l0, l1, l2);
+    // normal from the drop field
+    vec2 e = vec2(0.002, 0.0);
+    float cx = drops(duv + e, t, l0, l1, l2).x;
+    float cy = drops(duv + e.yx, t, l0, l1, l2).x;
+    n = vec2(cx - c.x, cy - c.x);
+  } else {
+    // phone: the one big-drop layer, refraction from its trail only
+    c = vec2(S(0.3, 1.0, m1.x), m1.y);
+    n = vec2(m1.x * 0.02, -m1.y * 0.01);
+  }
 
   if (gl_FrontFacing) {
     // inside the room: background is out of focus except where a drop refracts it sharply

@@ -76,35 +76,30 @@ export abstract class OsWindow {
     // frame
     ctx.fillStyle = C.panel;
     ctx.fillRect(0, 0, w, h);
-    // title bar
-    const g = ctx.createLinearGradient(0, 0, 0, OS.TITLE);
-    g.addColorStop(0, "#161723");
-    g.addColorStop(1, "#111219");
-    ctx.fillStyle = g;
+    // unified macOS title bar
+    ctx.fillStyle = this.focused ? "#2c2c2e" : "#232325";
     ctx.fillRect(0, 0, w, OS.TITLE);
-    ctx.fillStyle = C.line;
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillRect(0, 0, w, 1);
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
     ctx.fillRect(0, OS.TITLE - 1, w, 1);
     // traffic lights
     const dots = ["#ff5f57", "#febc2e", "#28c840"];
     dots.forEach((c, i) => {
       ctx.beginPath();
-      ctx.arc(16 + i * 18, OS.TITLE / 2, 5, 0, Math.PI * 2);
-      ctx.fillStyle = this.focused ? c : "#3a3a44";
+      ctx.arc(20 + i * 20, OS.TITLE / 2, 6, 0, Math.PI * 2);
+      ctx.fillStyle = this.focused || this.hover ? c : "#4a4a4e";
       ctx.fill();
+      ctx.strokeStyle = "rgba(0,0,0,0.25)";
+      ctx.lineWidth = 0.75;
+      ctx.stroke();
     });
-    ctx.font = mono(12, 500);
+    ctx.font = display(13, 600);
     ctx.textBaseline = "middle";
-    ctx.fillStyle = this.focused ? C.text : C.text2;
+    ctx.fillStyle = this.focused ? C.text : C.muted;
     ctx.textAlign = "center";
-    ctx.fillText(this.title, w / 2, OS.TITLE / 2 + 1);
+    ctx.fillText(this.title, w / 2, OS.TITLE / 2 + 0.5);
     ctx.textAlign = "left";
-    // focus accent
-    if (this.focused) {
-      ctx.fillStyle = this.accent;
-      ctx.globalAlpha = 0.9;
-      ctx.fillRect(0, 0, w, 1);
-      ctx.globalAlpha = 1;
-    }
     // body
     const body = this.body;
     ctx.save();
@@ -114,8 +109,8 @@ export abstract class OsWindow {
     ctx.translate(body.x, body.y);
     this.drawBody(ctx, { x: 0, y: 0, w: body.w, h: body.h }, now);
     ctx.restore();
-    // window edge
-    ctx.strokeStyle = this.focused ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)";
+    // corners are cut by the compositor / mesh; keep a hairline edge for contrast
+    ctx.strokeStyle = this.focused ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.09)";
     ctx.lineWidth = 1;
     ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
     return true;
@@ -125,12 +120,9 @@ export abstract class OsWindow {
   protected pill(ctx: CanvasRenderingContext2D, x: number, y: number, text: string, color: string) {
     ctx.font = mono(10, 500);
     const w = ctx.measureText(text).width + 12;
-    roundRect(ctx, x, y, w, 16, 4);
-    ctx.fillStyle = color + "22";
+    roundRect(ctx, x, y, w, 16, 8);
+    ctx.fillStyle = color + "26";
     ctx.fill();
-    ctx.strokeStyle = color + "66";
-    ctx.lineWidth = 1;
-    ctx.stroke();
     ctx.fillStyle = color;
     ctx.textBaseline = "middle";
     ctx.fillText(text, x + 6, y + 8.5);
@@ -138,7 +130,7 @@ export abstract class OsWindow {
   }
 
   protected heading(ctx: CanvasRenderingContext2D, x: number, y: number, text: string) {
-    ctx.font = display(18, 700);
+    ctx.font = display(18, 600);
     ctx.fillStyle = C.text;
     ctx.textBaseline = "alphabetic";
     ctx.fillText(text, x, y);

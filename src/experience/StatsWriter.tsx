@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { store } from "@/lib/store";
 import { rig } from "./rig/CameraRig";
+import { frameClock } from "@/lib/gl";
 
 declare global {
   interface Window {
@@ -34,6 +35,8 @@ export default function StatsWriter() {
     acc.current.calls = gl.info.render.calls;
     acc.current.triangles = gl.info.render.triangles;
     gl.info.reset();
+    frameClock.last = performance.now();
+    frameClock.frames++;
   }, -2000);
 
   useEffect(() => {
@@ -54,6 +57,8 @@ export default function StatsWriter() {
     };
   }, [gl]);
 
+  // negative priority: a positive one would tell R3F to stop rendering on its own,
+  // which blanks the LOW tier (no composer there to render instead)
   useFrame((_, dt) => {
     const a = acc.current;
     a.frames++;
@@ -76,7 +81,7 @@ export default function StatsWriter() {
       a.frames = 0;
       a.time = 0;
     }
-  }, 1000);
+  }, -1000);
 
   return null;
 }

@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/data";
 import Nav from "@/components/html/Nav";
 import Footer from "@/components/html/Footer";
 import Chrome from "@/components/ui/Chrome";
 
-const display = Space_Grotesk({
+const display = Inter({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -65,7 +65,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#050507",
+  themeColor: "#000000",
   colorScheme: "dark",
 };
 

@@ -34,13 +34,13 @@ export default function Lights() {
       <pointLight
         ref={led}
         position={[0.1, L.deskY + 0.32, L.wallZ + 0.16]}
-        color="#00f5ff"
+        color="#2997ff"
         intensity={1.2}
         distance={2.6}
         decay={2}
       />
       {/* window rim */}
-      <pointLight position={[L.window.x, L.window.y, L.wallZ + 0.3]} color="#7c3aed" intensity={0.9} distance={4} decay={2} />
+      <pointLight position={[L.window.x, L.window.y, L.wallZ + 0.3]} color="#5e5ce6" intensity={0.9} distance={4} decay={2} />
       <pointLight position={[L.window.x - 0.6, L.window.y + 0.3, L.wallZ + 0.1]} color="#4d7cff" intensity={0.35} distance={3} decay={2} />
       {/* soft key from above the desk (shadows on HIGH) */}
       <spotLight
@@ -59,8 +59,8 @@ export default function Lights() {
         shadow-radius={6}
       />
       <Environment resolution={128} frames={1} environmentIntensity={0.35}>
-        <Lightformer form="rect" intensity={2.5} color="#00f5ff" position={[0, -0.3, -2]} scale={[4, 0.1, 1]} />
-        <Lightformer form="rect" intensity={1.2} color="#7c3aed" position={[1.5, 1.2, -2.5]} scale={[2, 1.4, 1]} />
+        <Lightformer form="rect" intensity={2.5} color="#2997ff" position={[0, -0.3, -2]} scale={[4, 0.1, 1]} />
+        <Lightformer form="rect" intensity={1.2} color="#5e5ce6" position={[1.5, 1.2, -2.5]} scale={[2, 1.4, 1]} />
         <Lightformer form="rect" intensity={1.5} color="#dfe7ff" position={[0.3, 0.6, -1.5]} scale={[0.9, 0.55, 1]} />
         <Lightformer form="ring" intensity={0.4} color="#ffffff" position={[-2, 2, 1]} scale={2} />
         <mesh scale={30}>
